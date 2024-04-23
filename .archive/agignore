@@ -1,0 +1,8 @@
+*.map
+*.min.*
+.git
+bower_components/*
+node_modules/*
+tags
+vendor-tags
+vendor/*
