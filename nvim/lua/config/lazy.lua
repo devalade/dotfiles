@@ -1,42 +1,61 @@
-local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
-
-if not (vim.uv or vim.loop).fs_stat(lazypath) then
-  -- bootstrap lazy.nvim
-  -- stylua: ignore
-  vim.fn.system({ "git", "clone", "--filter=blob:none", "https://github.com/folke/lazy.nvim.git", "--branch=stable", lazypath })
-end
-vim.opt.rtp:prepend(vim.env.LAZY or lazypath)
-
-require("lazy").setup({
-  spec = {
-    -- add LazyVim and import its plugins
-    { "LazyVim/LazyVim", import = "lazyvim.plugins" },
-    -- import any extras modules here
-    -- { import = "lazyvim.plugins.extras.lang.typescript" },
-    -- { import = "lazyvim.plugins.extras.lang.json" },
-    -- { import = "lazyvim.plugins.extras.ui.mini-animate" },
-    -- import/override with your plugins
-    { import = "plugins" },
+---@type LazySpec
+local lazy_spec = {
+  {
+    "AstroNvim/AstroNvim",
+    import = "astronvim.plugins",
+    opts = function(_, opts)
+      opts.mapleader = ","
+      opts.maplocalleader = ";"
+    end,
   },
-  defaults = {
-    -- By default, only LazyVim plugins will be lazy-loaded. Your custom plugins will load during startup.
-    -- If you know what you're doing, you can set this to `true` to have all your custom plugins lazy-loaded by default.
-    lazy = false,
-    -- It's recommended to leave version=false for now, since a lot the plugin that support versioning,
-    -- have outdated releases, which may break your Neovim install.
-    version = false, -- always use the latest git commit
-    -- version = "*", -- try installing the latest stable version for plugins that support semver
+
+  { "AstroNvim/astrocommunity" },
+  { import = "astrocommunity.pack.ansible" },
+  { import = "astrocommunity.pack.cmake" },
+  { import = "astrocommunity.pack.cpp" },
+  { import = "astrocommunity.pack.dart" },
+  { import = "astrocommunity.pack.docker" },
+  { import = "astrocommunity.pack.go" },
+  { import = "astrocommunity.pack.html-css" },
+  { import = "astrocommunity.pack.java" },
+  { import = "astrocommunity.pack.lua" },
+  { import = "astrocommunity.pack.proto" },
+  { import = "astrocommunity.pack.python-ruff" },
+  { import = "astrocommunity.pack.rust" },
+  { import = "astrocommunity.pack.tailwindcss" },
+  { import = "astrocommunity.pack.typescript-all-in-one" },
+  { import = "astrocommunity.editing-support.conform-nvim" },
+  { import = "astrocommunity.test.neotest" },
+  { import = "astrocommunity.test.nvim-coverage" },
+
+  { import = "plugins" },
+}
+
+---@type LazyConfig
+local lazy_opts = {
+  install = { colorscheme = { "habamax" } },
+  ui = {
+    border = "double",
+    backdrop = 100,
+    size = {
+      width = 0.8,
+      height = 0.8,
+    },
   },
-  install = { colorscheme = { "tokyonight", "habamax" } },
-  checker = { enabled = true }, -- automatically check for plugin updates
+  dev = {
+    path = "~/neovim",
+  },
+  change_detection = {
+    enabled = true,
+    notify = false,
+  },
+  custom_keys = {},
   performance = {
     rtp = {
-      -- disable some rtp plugins
       disabled_plugins = {
         "gzip",
-        -- "matchit",
-        -- "matchparen",
-        -- "netrwPlugin",
+        "netrwPlugin",
+        "rplugin",
         "tarPlugin",
         "tohtml",
         "tutor",
@@ -44,4 +63,6 @@ require("lazy").setup({
       },
     },
   },
-})
+}
+
+require("lazy").setup(lazy_spec, lazy_opts)

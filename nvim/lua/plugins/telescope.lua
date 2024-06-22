@@ -1,108 +1,53 @@
+---@type LazySpec
 return {
   "nvim-telescope/telescope.nvim",
   dependencies = {
-    "nvim-lua/plenary.nvim",
-    "nvim-tree/nvim-web-devicons",
-    "nvim-telescope/telescope-live-grep-args.nvim",
-    { "nvim-telescope/telescope-fzf-native.nvim", build = "make" },
+    {
+      "nvim-telescope/telescope-smart-history.nvim",
+      dependencies = { "kkharji/sqlite.lua" },
+    },
+    { "nvim-telescope/telescope-live-grep-args.nvim", version = "^1.0.0" },
   },
-  keys = {
-    {
-      "<leader>ff",
-      function()
-        require("telescope.builtin").find_files()
-      end,
-    },
-    {
-      "<leader>FF",
-      function()
-        require("telescope.builtin").find_files({ no_ignore = true, prompt_title = "All Files" })
-      end,
-    },
-    {
-      "<leader>fb",
-      function()
-        require("telescope.builtin").buffers()
-      end,
-    },
-    {
-      "<leader>fw",
-      function()
-        require("telescope").extensions.live_grep_args.live_grep_args()
-      end,
-    },
-    {
-      "<leader>fo",
-      function()
-        require("telescope.builtin").oldfiles()
-      end,
-    },
-    {
-      "<leader>fs",
-      function()
-        require("telescope.builtin").lsp_document_symbols()
-      end,
-    },
-  },
-  config = function()
-    local actions = require("telescope.actions")
+  init = function()
+    local wk = require "which-key"
+    wk.register {
+      ["<Leader>f"] = {
+        g = {
+          function() require("telescope-live-grep-args.shortcuts").grep_word_under_cursor() end,
+          "Find word under cursor",
+        },
+        w = {
+          function() require("telescope").extensions.live_grep_args.live_grep_args() end,
+          "Find words",
+        },
+      },
+    }
 
-    require("telescope").setup({
-      defaults = {
-        path_display = { truncate = 1 },
-        prompt_prefix = "   ",
-        selection_caret = "  ",
-        layout_config = {
-          prompt_position = "top",
+    wk.register({
+      ["<Leader>f"] = {
+        name = " Find",
+        v = {
+          function() require("telescope-live-grep-args.shortcuts").grep_visual_selection() end,
+          "Find visual selection",
         },
-        preview = {
-          timeout = 200,
-        },
-        sorting_strategy = "ascending",
+      },
+    }, { mode = "v" })
+  end,
+  opts = function(_, opts)
+    local lga_actions = require "telescope-live-grep-args.actions"
+
+    opts["extensions"] = {
+      smart_history = {},
+      live_grep_args = {
+        auto_quoting = true,
         mappings = {
           i = {
-            ["<esc>"] = actions.close,
-            ["<C-Down>"] = actions.cycle_history_next,
-            ["<C-Up>"] = actions.cycle_history_prev,
-          },
-        },
-        file_ignore_patterns = { ".git/", "node_modules" },
-      },
-      extensions = {
-        live_grep_args = {
-          mappings = {
-            i = {
-              ["<C-k>"] = require("telescope-live-grep-args.actions").quote_prompt(),
-              ["<C-i>"] = require("telescope-live-grep-args.actions").quote_prompt({ postfix = " --iglob " }),
-            },
+            ["<C-k>"] = lga_actions.quote_prompt(),
+            ["<C-i>"] = lga_actions.quote_prompt { postfix = " --iglob " },
+            ["<C-l>"] = lga_actions.quote_prompt { postfix = " -t" },
           },
         },
       },
-      pickers = {
-        find_files = {
-          hidden = true,
-        },
-        buffers = {
-          previewer = false,
-          layout_config = {
-            width = 80,
-          },
-        },
-        oldfiles = {
-          prompt_title = "History",
-        },
-        lsp_references = {
-          previewer = false,
-        },
-        lsp_definitions = {
-          previewer = false,
-        },
-        lsp_document_symbols = {
-          symbol_width = 55,
-        },
-      },
-    })
-
-    require("telescope").load_extension("fzf")
+    }
   end,
 }

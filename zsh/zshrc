@@ -105,6 +105,14 @@ alias cat="bat"
 alias webcam="gphoto2 --stdout --capture-movie | ffmpeg -i - -vcodec rawvideo -pix_fmt yuv420p -threads 0 -f v4l2 /dev/video2"
 alias sail='[ -f sail ] && sail || vendor/bin/sail'
 
+#Node
+alias p="pnpm"
+alias npm="npm"
+alias yarn="yarn"
+alias prd="pnpm run dev"
+alias nrd="pnpm run dev"
+alias yd="pnpm run dev"
+
 # Laravel
 alias a="artisan"
 alias tinker="artisan tinker"
@@ -168,3 +176,65 @@ zstyle :bracketed-paste-magic paste-finish pastefinish
 
 
 # vim: nospell
+
+convert_video() {
+  local input_file="$1"
+  local output_file="${input_file%.*}.mp4"  # Remove extension and add .mp4
+
+  # Check if ffmpeg is installed
+  if ! command -v ffmpeg &> /dev/null; then
+    echo "Error: ffmpeg is not installed. Please install ffmpeg before using this script."
+    return 1
+  fi
+
+  # Check if input file exists (use full path with current directory)
+  if [ ! -f "$PWD/$input_file" ]; then
+    echo "Error: Input file '$input_file' does not exist in the current directory."
+    return 1
+  fi
+
+  # Convert the video using full paths
+  ffmpeg -fflags +genpts -i "$PWD/$input_file" -r 24 "$PWD/$output_file"
+
+  if [ $? -eq 0 ]; then
+    echo "Video converted successfully: '$PWD/$output_file'"
+  else
+    echo "Error: Failed to convert video."
+  fi
+}
+
+# Function to install a tar.gz file
+install_tar_gz() {
+  # Get the filename from the first argument
+  filename="$1"
+
+  # Check if file exists
+  if [[ ! -f "$filename" ]]; then
+    echo "Error: File '$filename' not found!"
+    return 1
+  fi
+
+  # Extract the archive
+  tar -zxvf "$filename"
+
+  # Check for installation instructions
+  if [[ -f "INSTALL" || -f "README" ]]; then
+    echo "An installation file (INSTALL or README) was found."
+    echo "Please follow the instructions within for further installation steps."
+    echo "Common steps might include:"
+    echo "  * ./configure (if applicable)"
+    echo "  * make"
+    echo "  * sudo make install"
+  else
+    echo "No installation instructions found. You might need to compile the source code manually."
+  fi
+
+  # Ask user if they want to clean up the archive
+  read -p "Do you want to remove the archive (y/N)? " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    rm -f "$filename"
+  fi
+}
+
+. "$HOME/.cargo/env"
