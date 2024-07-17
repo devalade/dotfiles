@@ -52,12 +52,14 @@ path=(
     $HOME/.go/bin
     $HOME/.cargo/bin
     ./vendor/bin
+    /home/devalade/.pulumi/bin
     $HOME/.local/share/bob/nvim-bin
     $HOME/Code/jessarcher/dotfiles/scripts
     ${ANDROID_HOME}tools/
     ${ANDROID_HOME}platform-tools/
     $path
 )
+export PATH="$HOME/.spin/bin:$PATH"
 
 setopt auto_cd
 cdpath=(
