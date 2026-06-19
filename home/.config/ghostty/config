@@ -9,10 +9,10 @@ shell-integration = fish
 quit-after-last-window-closed = true
 
 # Font family
-font-family = Cascadia Code NF
+font-family = JetBrainsMono Nerd Font
 
 # Font size
-font-size = 18
+font-size = 14
 
 # Opacity of split windows
 unfocused-split-opacity = 0.97  
