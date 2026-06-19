@@ -1,0 +1,41 @@
+onboarding = false
+
+# Keybindings mapped from ~/.tmux.conf (prefix C-a, vim-style pane nav, tmux split keys).
+[keys]
+prefix = "ctrl+a"
+
+# Tabs (tmux "windows")
+new_tab = ["prefix+c", "prefix+n"]
+rename_tab = "prefix+r"
+next_tab = ["prefix+tab", "alt+tab"]
+previous_tab = ["prefix+shift+tab", "alt+shift+tab"]
+switch_tab = ["prefix+1..9", "alt+1..9"]
+close_tab = "prefix+shift+x"
+
+# Splits (tmux: | \ v % = side-by-side, - _ " = top/bottom)
+split_vertical = ["prefix+v", "prefix+shift+backslash", "prefix+backslash", "prefix+shift+5"]
+split_horizontal = ["prefix+minus", "prefix+shift+minus", "prefix+shift+quote"]
+
+# Panes (tmux h/j/k/l)
+focus_pane_left = "prefix+h"
+focus_pane_down = "prefix+j"
+focus_pane_up = "prefix+k"
+focus_pane_right = "prefix+l"
+
+# Free prefix+tab for tab cycling (tmux used Tab/BTab for windows)
+cycle_pane_next = ""
+cycle_pane_previous = ""
+
+# Workspaces
+rename_workspace = "prefix+shift+r"
+
+# Session
+reload_config = "prefix+alt+r"
+detach = "prefix+q"
+resize_mode = "prefix+ctrl+r"
+close_pane = "prefix+x"
+zoom = "prefix+z"
+copy_mode = "prefix+["
+
+[experimental]
+pane_history = false
