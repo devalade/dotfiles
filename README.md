@@ -4,7 +4,7 @@ A comprehensive, automated dotfiles management system for macOS development envi
 
 ## Overview
 
-This repository contains my personal development environment configuration, managed through a custom CLI tool called `dot`. It uses GNU Stow for symlink management, Homebrew for package installation, and includes configurations for Fish shell, Neovim, Tmux, Git, and other essential development tools.
+This repository contains my personal development environment configuration, managed through a custom CLI tool called `dot`. It uses GNU Stow for symlink management, Homebrew for package installation, and includes configurations for Neovim, Tmux, Git, and other essential development tools.
 
 ### Key Features
 
@@ -37,7 +37,6 @@ After installation, the `dot` command will be available globally for ongoing man
 ├── dot                 # Main CLI tool
 ├── home/              # Configuration files (stowed to ~)
 │   ├── .config/
-│   │   ├── fish/      # Fish shell configuration
 │   │   ├── git/       # Git configuration
 │   │   ├── nvim/      # Neovim configuration
 │   │   ├── tmux/      # Tmux configuration
@@ -81,7 +80,6 @@ dot init --skip-ssh --skip-font
 5. Installs pi via the Vite+ tool registry
 6. Generates SSH key for GitHub (optional)
 7. Installs MonoLisa font (optional)
-8. Sets up Fish shell with plugins
 
 ### Maintenance Commands
 
@@ -103,7 +101,6 @@ Comprehensive diagnostics including:
 - ✅ Homebrew installation
 - ✅ Essential tools (git, nvim, tmux, node, etc.)
 - ✅ pi installation and core development tools
-- ✅ Fish shell configuration
 - ✅ PATH configuration
 - ⚠️ Broken symlinks detection
 - ⚠️ Missing dependencies
@@ -230,7 +227,7 @@ dot package remove docker base  # Remove docker from base bundle only
 #### Package Files
 
 **`packages/bundle`** - Base packages for all machines:
-- Development tools: neovim, tmux, fish, git
+- Development tools: neovim, tmux, git
 - CLI utilities: ripgrep, fd, fzf, starship
 - Applications: Arc browser, Raycast, OrbStack
 - AI tools: aider
@@ -249,7 +246,6 @@ dot package remove docker base  # Remove docker from base bundle only
 
 ### Key Configurations
 
-- **Fish Shell**: Custom functions, environment variables, and plugin management via Fisher
 - **Neovim**: Lua-based configuration with lazy.nvim plugin manager
 - **Tmux**: Plugin management via TPM, session persistence, Vim-style navigation
 - **Git**: Conditional work configuration, custom aliases, GPG signing
@@ -259,7 +255,7 @@ dot package remove docker base  # Remove docker from base bundle only
 - **GNU Stow**: Manages symlinks from `home/` to `~`
 - **Modular Design**: Separate configs for different tools
 - **Conditional Loading**: Work-specific Git config for `~/Code/work/`
-- **Plugin Managers**: Each tool uses its own (lazy.nvim, TPM, Fisher)
+- **Plugin Managers**: Each tool uses its own (lazy.nvim, TPM)
 - **Error Resilience**: Package installation continues despite individual failures
 - **jj Support**: Auto-detects jj-managed repos and uses appropriate update commands
 
@@ -284,10 +280,11 @@ dot package remove docker base  # Remove docker from base bundle only
    ./dot init
    ```
 
-3. **Restart shell or source Fish config:**
+3. **Restart your terminal** (the shell is zsh, user-managed):
    ```bash
-   # In Fish shell
-   source ~/.config/fish/config.fish
+   # Open a new terminal tab, or:
+   exec zsh
+```
    
    # Or restart terminal
    ```
@@ -336,10 +333,7 @@ The system automatically applies work-specific Git configuration for repositorie
 
 **Command not found: `dot`**
 ```bash
-# Source Fish configuration
-source ~/.config/fish/config.fish
-
-# Or add to PATH manually
+# Add to PATH manually
 export PATH="$HOME/.dotfiles:$PATH"
 ```
 

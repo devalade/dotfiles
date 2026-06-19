@@ -123,7 +123,6 @@ TOOL_REGISTRY=(
     "pi                ;; pi   ;; vp install -g @mariozechner/pi-coding-agent   ;; true  ;; -         ;; true"
     "SSH key           ;; -    ;; fn:_generate_ssh_key                          ;; false ;; SKIP_SSH  ;; false"
     "MonoLisa font     ;; -    ;; fn:_install_font                              ;; false ;; SKIP_FONT ;; false"
-    "Fish shell        ;; -    ;; fn:_setup_fish_shell                          ;; false ;; -         ;; false"
 )
 
 # Parse a registry entry into variables: r_name, r_check, r_install, r_required, r_skip, r_doctor
