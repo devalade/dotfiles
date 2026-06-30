@@ -1013,6 +1013,65 @@ cmd_package() {
     esac
 }
 
+cmd_skills() {
+    local subcommand="${1:-sync}"
+    shift || true
+    
+    case "$subcommand" in
+        sync)
+            cmd_skills_sync "$@"
+            ;;
+        -h|--help|help)
+            cmd_skills_help
+            ;;
+        *)
+            print_error "Unknown skills subcommand: $subcommand"
+            print_info "Run '${SCRIPT_NAME} skills help' for usage"
+            return 1
+            ;;
+    esac
+}
+
+cmd_skills_sync() {
+    local sync_script="${HOME}/.agents/sync-skills.sh"
+    local force_flag=""
+    
+    if [[ "${1:-}" == "--force" ]]; then
+        force_flag="--force"
+    fi
+    
+    if [[ ! -x "$sync_script" ]]; then
+        print_error "Skills sync script not found or not executable: $sync_script"
+        print_info "Run '${SCRIPT_NAME} stow' first to link dotfiles, or copy manually"
+        return 1
+    fi
+    
+    print_header "Syncing agent skills"
+    bash "$sync_script" $force_flag
+    print_success "Skills synced"
+}
+
+cmd_skills_help() {
+    echo -e "${BOLD}${SCRIPT_NAME} skills${RESET} - Cross-agent skill management"
+    echo ""
+    
+    echo -e "${BOLD}USAGE:${RESET}"
+    echo "    ${SCRIPT_NAME} skills [SUBCOMMAND]"
+    echo ""
+    
+    echo -e "${BOLD}SUBCOMMANDS:${RESET}"
+    echo "    sync [--force]             Copy ~/.agents/skills to ~/.agents/skills and wire agents"
+    echo "    help                       Show this help message"
+    echo ""
+    
+    echo -e "${BOLD}NOTES:${RESET}"
+    echo "    - Canonical skills live in ~/.dotfiles/home/.agents/skills/"
+    echo "    - sync copies the pool to ~/.agents/skills/ and symlinks it for Claude, OpenCode, pi"
+    echo "    - Codex gets per-skill symlinks so its ~/.codex/skills/.system stays untouched"
+    echo "    - Use --force to replace existing agent skills directories without prompting"
+    echo ""
+}
+
 cmd_package_add() {
     local package_name="$1"
     local package_type="${2:-auto}"
@@ -1518,6 +1577,7 @@ cmd_help() {
     echo "    check-packages      Check which packages are installed/missing"
     echo "    retry-failed        Retry failed package installations"
     echo "    gen-ssh-key         Generate SSH key for GitHub/GitLab with email"
+    echo "    skills              Cross-agent skill management"
     echo "    stow                Create symlinks for dotfiles using GNU Stow"
     echo "    link                Install dot command globally (create symlink in PATH)"
     echo "    unlink              Uninstall global dot command (remove symlink)"
@@ -1543,6 +1603,7 @@ cmd_help() {
     echo "    ${SCRIPT_NAME} package remove docker     # Remove docker from bundles"
     echo "    ${SCRIPT_NAME} check-packages            # See package installation status"
     echo "    ${SCRIPT_NAME} retry-failed              # Retry any failed installations"
+    echo "    ${SCRIPT_NAME} skills sync               # Sync ~/.agents/skills to Codex"
     echo "    ${SCRIPT_NAME} gen-ssh-key               # Generate SSH key (prompts for email)"
     echo "    ${SCRIPT_NAME} gen-ssh-key user@github.com  # Generate SSH key with email"
     echo "    ${SCRIPT_NAME} stow                      # Create symlinks for dotfiles"
@@ -1609,6 +1670,9 @@ main() {
             ;;
         package)
             cmd_package "$@"
+            ;;
+        skills)
+            cmd_skills "$@"
             ;;
         check-packages)
             cmd_check_packages "$@"

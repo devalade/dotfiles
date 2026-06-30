@@ -26,11 +26,10 @@ npm workspace for pi agent extensions + skills. TypeScript, ESM-only.
 │   │   ├── update.ts             # Standalone: self-update logic
 │   │   ├── whimsical.ts          # Standalone: whimsical diagram integration
 │   │   └── web-tools.json        # Helium browser profile config
-│   └── skills/           # 25 agent skills (SKILL.md + resources)
+│   └── skills/           # Populated by `dot skills sync` -> ~/.agents/skills
 │       ├── tdd/          # Test-driven development
 │       ├── tmux/         # Tmux remote control
-│       ├── triage/       # Issue triage state machine
-│       ├── init-deep/    # AGENTS.md generation (this skill)
+│       ├── init-deep/    # AGENTS.md generation
 │       └── ...           # grill-with-docs, to-issues, to-prd, write-a-skill, etc.
 ```
 
@@ -42,7 +41,7 @@ npm workspace for pi agent extensions + skills. TypeScript, ESM-only.
 | Add pi package | `agent/settings.json` → `packages[]` |
 | Create extension | `agent/extensions/<name>/` with `package.json` |
 | Create standalone extension | `agent/extensions/<name>.ts` |
-| Create skill | `agent/skills/<name>/SKILL.md` |
+| Create skill | `../../.agents/skills/<name>/SKILL.md` (canonical pool) |
 | Secret masking | `agent/cloak.json` |
 | Run extension tests | `npm run test:web-tools` (from .pi root) |
 | Type-check | `npm run check` (from .pi root) |
