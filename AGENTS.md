@@ -19,7 +19,7 @@ macOS dev env via GNU Stow. Neovim + Tmux + Git + pi. (Shell: zsh, user-managed)
 │   └── ripgrep/        # rg config
 ├── home/.pi/           # Pi agent workspace (AGENTS.md)
 │   ├── agent/extensions/ # 6 TypeScript extensions
-│   └── agent/skills/   # 15 agent skills
+│   └── agent/skills/   # 25 agent skills
 ├── packages/
 │   ├── bundle          # Base Brewfile (32 formulas, 13 casks)
 │   └── bundle.work     # Work additions (formulas only)

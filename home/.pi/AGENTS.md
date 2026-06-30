@@ -26,7 +26,7 @@ npm workspace for pi agent extensions + skills. TypeScript, ESM-only.
 │   │   ├── update.ts             # Standalone: self-update logic
 │   │   ├── whimsical.ts          # Standalone: whimsical diagram integration
 │   │   └── web-tools.json        # Helium browser profile config
-│   └── skills/           # 15 agent skills (SKILL.md + resources)
+│   └── skills/           # 25 agent skills (SKILL.md + resources)
 │       ├── tdd/          # Test-driven development
 │       ├── tmux/         # Tmux remote control
 │       ├── triage/       # Issue triage state machine
