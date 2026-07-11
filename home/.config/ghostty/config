@@ -9,7 +9,7 @@ shell-integration = fish
 quit-after-last-window-closed = true
 
 # Font family
-font-family = JetBrainsMono Nerd Font
+font-family = JetBrainsMono Nerd Font Mono
 
 # Font size
 font-size = 14
