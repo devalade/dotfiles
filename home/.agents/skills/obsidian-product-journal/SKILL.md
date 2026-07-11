@@ -18,37 +18,41 @@ Keep durable product + engineering memory in Obsidian — **English only**. Work
 /Users/macuser/Works/personal/obsidian
 ```
 
-Override if the user names another vault. Each product is its own top-level folder:
+Override if the user names another vault. **All products live under `Products/`:**
 
 ```
-<vault>/<ProductName>/
+<vault>/Products/<ProductName>/
 ```
 
-Ask for (or infer from context) `<ProductName>` before writing. Do not assume a default product.
+Also maintain a vault-level index at `Products/MOC.md` listing every product.
+
+Ask for (or infer from context) `<ProductName>` before writing. Do not assume a default product. Never create a product journal at the vault root.
 
 ## Folder layout (required)
 
 ```
-<Product>/
-├── 00 - Index/
-│   ├── MOC.md
-│   ├── Technical decisions.md
-│   ├── What works.md
-│   ├── What doesn't work.md
-│   ├── Monetization.md
-│   └── Distribution.md
-├── Decisions/          # one note per decision
-├── Learnings/          # what worked / didn't
-├── Monetization/
-├── Distribution/
-└── _templates/
-    ├── Technical decision.md
-    ├── Learning.md
-    ├── Monetization note.md
-    └── Distribution note.md
+Products/
+├── MOC.md                 # index of all products
+└── <ProductName>/
+    ├── 00 - Index/
+    │   ├── MOC.md
+    │   ├── Technical decisions.md
+    │   ├── What works.md
+    │   ├── What doesn't work.md
+    │   ├── Monetization.md
+    │   └── Distribution.md
+    ├── Decisions/          # one note per decision
+    ├── Learnings/          # what worked / didn't
+    ├── Monetization/
+    ├── Distribution/
+    └── _templates/
+        ├── Technical decision.md
+        ├── Learning.md
+        ├── Monetization note.md
+        └── Distribution note.md
 ```
 
-If the folder is missing, create this tree + index stubs + templates before writing notes.
+If `Products/` or the product folder is missing, create this tree + index stubs + templates before writing notes. When adding a **new** product, also link it from `Products/MOC.md`.
 
 ## When to write
 
@@ -60,14 +64,14 @@ If the folder is missing, create this tree + index stubs + templates before writ
 | Price, margin, billing model | `Monetization/` |
 | Channels, CTAs, funnel, go-to-market | `Distribution/` |
 
-After creating a note, **link it** from the matching `00 - Index/*.md` list.
+Paths above are relative to `Products/<ProductName>/`. After creating a note, **link it** from the matching `00 - Index/*.md` list.
 
 ## Note rules
 
 1. **English only** — titles, bodies, folder names, templates.
 2. **One note = one idea.** Prefer dated titles for decisions: `YYYY-MM Short decision title`.
 3. **No secrets** — no API keys, tokens, passwords, `.env` values. Link GitHub issues instead.
-4. Use wikilinks: `[[Decisions/YYYY-MM …]]`.
+4. Use wikilinks relative to the product folder: `[[Decisions/YYYY-MM …]]`. From vault root / Welcome, use `[[Products/<ProductName>/…]]`.
 5. Link build work to issues when known: `https://github.com/<org>/<repo>/issues/N`.
 6. Tags use a **product slug** derived from the folder name (lowercase, hyphenated) — never bake one product into the skill.
 
@@ -197,18 +201,20 @@ tags:
 ## Workflow
 
 1. Confirm **product folder name** (required — ask if unclear).
-2. Ensure layout exists (bootstrap if needed).
-3. Classify the user’s ask → Decisions / Learnings / Monetization / Distribution.
-4. Write the note with the matching template.
-5. Update the relevant `00 - Index/*.md` and `MOC.md` if status changed.
-6. Tell the user the vault-relative path (wikilink).
+2. Ensure `Products/<ProductName>/` layout exists (bootstrap if needed).
+3. Link new products from `Products/MOC.md`.
+4. Classify the user’s ask → Decisions / Learnings / Monetization / Distribution.
+5. Write the note with the matching template.
+6. Update the relevant `00 - Index/*.md` and product `MOC.md` if status changed.
+7. Tell the user the vault-relative path (wikilink under `Products/`).
 
 ## Bootstrap MOC stub
 
-When creating a new product folder, seed `00 - Index/MOC.md` with links to the five index notes + the four templates. Keep current-state bullets short and factual; fill from conversation context for **that** product only.
+When creating a new product folder, seed `00 - Index/MOC.md` with links to the five index notes + the four templates. Keep current-state bullets short and factual; fill from conversation context for **that** product only. Ensure `Products/MOC.md` lists the product.
 
 ## Anti-patterns
 
+- Do not create product journals at the vault root — always under `Products/`.
 - Do not hardcode or default to a specific product name.
 - Do not write non-English into this journal unless the user explicitly overrides.
 - Do not dump raw chat transcripts — distill into Context / Decision / Lesson.
