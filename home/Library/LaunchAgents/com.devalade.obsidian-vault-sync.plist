@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>Label</key>
+	<string>com.devalade.obsidian-vault-sync</string>
+
+	<key>ProgramArguments</key>
+	<array>
+		<string>/bin/bash</string>
+		<string>-lc</string>
+		<string>exec "$HOME/.local/bin/obsidian-vault-sync"</string>
+	</array>
+
+	<!-- Every hour -->
+	<key>StartInterval</key>
+	<integer>3600</integer>
+
+	<key>RunAtLoad</key>
+	<true/>
+
+	<key>EnvironmentVariables</key>
+	<dict>
+		<key>PATH</key>
+		<string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string>
+		<key>OBSIDIAN_VAULT</key>
+		<string>/Users/macuser/Works/personal/obsidian</string>
+		<key>OBSIDIAN_VAULT_BRANCH</key>
+		<string>main</string>
+		<key>OBSIDIAN_VAULT_REMOTE</key>
+		<string>origin</string>
+	</dict>
+
+	<key>StandardOutPath</key>
+	<string>/Users/macuser/Library/Logs/obsidian-vault-sync.stdout.log</string>
+	<key>StandardErrorPath</key>
+	<string>/Users/macuser/Library/Logs/obsidian-vault-sync.stderr.log</string>
+</dict>
+</plist>

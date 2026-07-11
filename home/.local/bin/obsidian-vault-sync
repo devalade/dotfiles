@@ -1,0 +1,67 @@
+#!/usr/bin/env bash
+# Sync the Obsidian vault with GitHub (pull --rebase, commit local changes, push).
+# Safe for launchd: no interactive prompts; empty dirty-tree = no commit.
+set -euo pipefail
+
+VAULT="${OBSIDIAN_VAULT:-${HOME}/Works/personal/obsidian}"
+BRANCH="${OBSIDIAN_VAULT_BRANCH:-main}"
+REMOTE="${OBSIDIAN_VAULT_REMOTE:-origin}"
+LOG_PREFIX="[obsidian-vault-sync $(date '+%Y-%m-%d %H:%M:%S')]"
+
+log() { printf '%s %s\n' "$LOG_PREFIX" "$*"; }
+
+if [[ ! -d "$VAULT/.git" ]]; then
+  log "error: not a git repo: $VAULT"
+  exit 1
+fi
+
+cd "$VAULT"
+
+# Prefer Homebrew git/ssh on Apple Silicon / Intel
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${PATH:-}"
+
+if ! git rev-parse --is-inside-work-tree >/dev/null 2>&1; then
+  log "error: invalid git work tree"
+  exit 1
+fi
+
+log "vault=$VAULT branch=$BRANCH"
+
+# Fetch + rebase onto remote tip (explicit; avoids multi-branch pull quirks)
+if git rev-parse --verify "${REMOTE}/${BRANCH}" >/dev/null 2>&1 || git ls-remote --exit-code "$REMOTE" "refs/heads/${BRANCH}" >/dev/null 2>&1; then
+  git fetch "$REMOTE" "$BRANCH"
+  if ! git rebase --autostash "${REMOTE}/${BRANCH}"; then
+    log "error: rebase onto ${REMOTE}/${BRANCH} failed"
+    git rebase --abort 2>/dev/null || true
+    exit 1
+  fi
+  log "rebased onto ${REMOTE}/${BRANCH}"
+else
+  log "warn: ${REMOTE}/${BRANCH} missing; skip pull"
+fi
+
+# Commit local changes if any
+if [[ -n "$(git status --porcelain)" ]]; then
+  git add -A
+  if git diff --cached --quiet; then
+    log "nothing staged after add"
+  else
+    git commit -m "vault: autosync $(date -u '+%Y-%m-%dT%H:%MZ')"
+    log "committed local changes"
+  fi
+else
+  log "working tree clean"
+fi
+
+# Push if we have a remote and local is ahead (or just pushed a commit)
+if git rev-parse --verify "${REMOTE}/${BRANCH}" >/dev/null 2>&1; then
+  if ! git push "$REMOTE" "HEAD:${BRANCH}"; then
+    log "error: push failed (check SSH agent / GitHub auth for launchd)"
+    exit 1
+  fi
+  log "pushed to ${REMOTE}/${BRANCH}"
+else
+  log "warn: no remote branch; skip push"
+fi
+
+log "done"

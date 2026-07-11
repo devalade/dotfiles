@@ -1560,6 +1560,222 @@ cmd_package_help() {
     echo ""
 }
 
+cmd_obsidian() {
+    local subcommand="${1:-help}"
+    shift || true
+
+    case "$subcommand" in
+        install)
+            cmd_obsidian_install "$@"
+            ;;
+        uninstall)
+            cmd_obsidian_uninstall "$@"
+            ;;
+        sync)
+            cmd_obsidian_sync "$@"
+            ;;
+        status)
+            cmd_obsidian_status "$@"
+            ;;
+        -h|--help|help)
+            cmd_obsidian_help
+            ;;
+        *)
+            print_error "Unknown obsidian subcommand: $subcommand"
+            print_info "Run '${SCRIPT_NAME} obsidian help' for usage"
+            return 1
+            ;;
+    esac
+}
+
+cmd_obsidian_help() {
+    echo -e "${BOLD}${SCRIPT_NAME} obsidian${RESET} - Obsidian vault git sync (hourly LaunchAgent)"
+    echo ""
+    echo -e "${BOLD}USAGE:${RESET}"
+    echo "    ${SCRIPT_NAME} obsidian [SUBCOMMAND]"
+    echo ""
+    echo -e "${BOLD}SUBCOMMANDS:${RESET}"
+    echo "    install      Stow links, load hourly LaunchAgent, run one sync"
+    echo "    uninstall    Unload LaunchAgent"
+    echo "    sync         Run vault sync once now"
+    echo "    status       Show agent state + recent logs"
+    echo "    help         Show this help message"
+    echo ""
+    echo -e "${BOLD}ONE-SHOT:${RESET}"
+    echo "    ${SCRIPT_NAME} obsidian install"
+    echo ""
+    echo -e "${BOLD}NOTES:${RESET}"
+    echo "    - Vault default: ~/Works/personal/obsidian"
+    echo "    - Label: com.devalade.obsidian-vault-sync (every 3600s)"
+    echo "    - Logs: ~/Library/Logs/obsidian-vault-sync.*.log"
+    echo "    - Docs: ~/.config/obsidian/README.md (after install)"
+    echo "    - install links script+plist from dotfiles (no full stow required)"
+    echo ""
+}
+
+_obsidian_label() {
+    echo "com.devalade.obsidian-vault-sync"
+}
+
+_obsidian_plist() {
+    echo "${HOME}/Library/LaunchAgents/$(_obsidian_label).plist"
+}
+
+_obsidian_uid_domain() {
+    echo "gui/$(id -u)"
+}
+
+cmd_obsidian_install() {
+    local label plist domain script src_script src_plist
+    label="$(_obsidian_label)"
+    plist="$(_obsidian_plist)"
+    domain="$(_obsidian_uid_domain)"
+    script="${HOME}/.local/bin/obsidian-vault-sync"
+    src_script="${HOME_DIR}/.local/bin/obsidian-vault-sync"
+    src_plist="${HOME_DIR}/Library/LaunchAgents/${label}.plist"
+
+    print_header "Installing Obsidian vault hourly sync"
+
+    # Link only what we need — avoid full `dot stow` (often blocked by skills conflicts)
+    print_info "Linking sync script + LaunchAgent from dotfiles..."
+    mkdir -p "${HOME}/.local/bin" "${HOME}/Library/LaunchAgents" "${HOME}/Library/Logs"
+
+    if [[ ! -f "$src_script" ]]; then
+        print_error "Missing sync script in dotfiles: $src_script"
+        return 1
+    fi
+    if [[ ! -f "$src_plist" ]]; then
+        print_error "Missing LaunchAgent in dotfiles: $src_plist"
+        return 1
+    fi
+
+    chmod +x "$src_script"
+    ln -sfn "$src_script" "$script"
+    ln -sfn "$src_plist" "$plist"
+
+    # Optional docs link (non-fatal)
+    mkdir -p "${HOME}/.config"
+    if [[ -d "${HOME_DIR}/.config/obsidian" ]]; then
+        ln -sfn "${HOME_DIR}/.config/obsidian" "${HOME}/.config/obsidian"
+    fi
+
+    if [[ ! -x "$script" ]]; then
+        print_error "Sync script missing or not executable: $script"
+        return 1
+    fi
+    if [[ ! -f "$plist" ]]; then
+        print_error "LaunchAgent plist missing: $plist"
+        return 1
+    fi
+    print_success "Links ready"
+
+    # Unload previous job if present (ignore errors)
+    launchctl bootout "${domain}/${label}" 2>/dev/null || true
+    launchctl unload "$plist" 2>/dev/null || true
+
+    print_info "Loading LaunchAgent (${label})..."
+    if launchctl bootstrap "$domain" "$plist"; then
+        print_success "LaunchAgent loaded"
+    else
+        # Fallback for older macOS
+        if launchctl load -w "$plist"; then
+            print_success "LaunchAgent loaded (legacy load)"
+        else
+            print_error "Failed to load LaunchAgent"
+            return 1
+        fi
+    fi
+
+    launchctl enable "${domain}/${label}" 2>/dev/null || true
+
+    print_info "Running initial sync..."
+    if cmd_obsidian_sync; then
+        print_success "Initial sync ok"
+    else
+        print_warning "Initial sync failed — check SSH auth for launchd / git remote"
+        print_info "Logs: ~/Library/Logs/obsidian-vault-sync.stderr.log"
+    fi
+
+    print_success "Hourly Obsidian vault sync installed"
+    print_info "Status: ${SCRIPT_NAME} obsidian status"
+}
+
+cmd_obsidian_uninstall() {
+    local label plist domain
+    label="$(_obsidian_label)"
+    plist="$(_obsidian_plist)"
+    domain="$(_obsidian_uid_domain)"
+
+    print_header "Uninstalling Obsidian vault hourly sync"
+
+    launchctl bootout "${domain}/${label}" 2>/dev/null || true
+    launchctl unload "$plist" 2>/dev/null || true
+    launchctl disable "${domain}/${label}" 2>/dev/null || true
+
+    print_success "LaunchAgent unloaded (${label})"
+    print_info "Plist/script remain via stow; re-enable with: ${SCRIPT_NAME} obsidian install"
+}
+
+cmd_obsidian_sync() {
+    local script="${HOME}/.local/bin/obsidian-vault-sync"
+    if [[ ! -x "$script" ]]; then
+        print_error "Sync script not found: $script"
+        print_info "Run '${SCRIPT_NAME} stow' then '${SCRIPT_NAME} obsidian install'"
+        return 1
+    fi
+    print_header "Syncing Obsidian vault"
+    "$script"
+}
+
+cmd_obsidian_status() {
+    local label domain plist
+    label="$(_obsidian_label)"
+    domain="$(_obsidian_uid_domain)"
+    plist="$(_obsidian_plist)"
+
+    print_header "Obsidian vault sync status"
+    echo "Label:  ${label}"
+    echo "Plist:  ${plist}"
+    echo "Script: ${HOME}/.local/bin/obsidian-vault-sync"
+    echo "Vault:  ${OBSIDIAN_VAULT:-$HOME/Works/personal/obsidian}"
+    echo ""
+
+    if [[ -f "$plist" ]]; then
+        print_success "Plist present"
+    else
+        print_warning "Plist missing (run ${SCRIPT_NAME} stow)"
+    fi
+
+    if [[ -x "${HOME}/.local/bin/obsidian-vault-sync" ]]; then
+        print_success "Sync script present"
+    else
+        print_warning "Sync script missing"
+    fi
+
+    echo ""
+    print_info "launchctl print ${domain}/${label}:"
+    if launchctl print "${domain}/${label}" 2>/dev/null; then
+        true
+    else
+        print_warning "Agent not loaded — run: ${SCRIPT_NAME} obsidian install"
+    fi
+
+    echo ""
+    print_info "Recent stdout (last 15):"
+    if [[ -f "${HOME}/Library/Logs/obsidian-vault-sync.stdout.log" ]]; then
+        tail -n 15 "${HOME}/Library/Logs/obsidian-vault-sync.stdout.log" || true
+    else
+        echo "(no stdout log yet)"
+    fi
+    echo ""
+    print_info "Recent stderr (last 15):"
+    if [[ -f "${HOME}/Library/Logs/obsidian-vault-sync.stderr.log" ]]; then
+        tail -n 15 "${HOME}/Library/Logs/obsidian-vault-sync.stderr.log" || true
+    else
+        echo "(no stderr log yet)"
+    fi
+}
+
 cmd_help() {
     echo -e "${BOLD}${SCRIPT_NAME}${RESET} - Dotfiles management tool"
     echo "Version: ${VERSION}"
@@ -1578,6 +1794,7 @@ cmd_help() {
     echo "    retry-failed        Retry failed package installations"
     echo "    gen-ssh-key         Generate SSH key for GitHub/GitLab with email"
     echo "    skills              Cross-agent skill management"
+    echo "    obsidian            Obsidian vault hourly git sync (LaunchAgent)"
     echo "    stow                Create symlinks for dotfiles using GNU Stow"
     echo "    link                Install dot command globally (create symlink in PATH)"
     echo "    unlink              Uninstall global dot command (remove symlink)"
@@ -1604,6 +1821,7 @@ cmd_help() {
     echo "    ${SCRIPT_NAME} check-packages            # See package installation status"
     echo "    ${SCRIPT_NAME} retry-failed              # Retry any failed installations"
     echo "    ${SCRIPT_NAME} skills sync               # Sync ~/.agents/skills to Codex"
+    echo "    ${SCRIPT_NAME} obsidian install          # Hourly Obsidian vault sync"
     echo "    ${SCRIPT_NAME} gen-ssh-key               # Generate SSH key (prompts for email)"
     echo "    ${SCRIPT_NAME} gen-ssh-key user@github.com  # Generate SSH key with email"
     echo "    ${SCRIPT_NAME} stow                      # Create symlinks for dotfiles"
@@ -1673,6 +1891,9 @@ main() {
             ;;
         skills)
             cmd_skills "$@"
+            ;;
+        obsidian)
+            cmd_obsidian "$@"
             ;;
         check-packages)
             cmd_check_packages "$@"
