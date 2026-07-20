@@ -1,0 +1,4 @@
+interface:
+  display_name: "HN Hiring Leads"
+  short_description: "Find and score HN contract leads"
+  default_prompt: "Use $hn-hiring-leads to shortlist current Hacker News hiring leads for my profiles."
