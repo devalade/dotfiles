@@ -29,4 +29,8 @@ Current workspace-managed extensions live under:
 - `agent/extensions/pi-mcp`
 - `agent/extensions/opencode-cloudflare`
 
+The standalone `agent/extensions/deepseek-execution.ts` extension applies the
+highest available thinking level to `opencode-go/deepseek-v4-flash`, adds
+execution-focused guidance, and provides a bounded `batch_read` tool.
+
 After changing extension code, reload pi with `/reload`.
