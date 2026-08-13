@@ -17,10 +17,19 @@ split_vertical = ["prefix+v", "prefix+shift+backslash", "prefix+backslash", "pre
 split_horizontal = ["prefix+minus", "prefix+shift+minus", "prefix+shift+quote"]
 
 # Panes (tmux h/j/k/l)
+# Pane nav stays behind the prefix so plain h/j/k/l only ever reaches nvim.
 focus_pane_left = "prefix+h"
 focus_pane_down = "prefix+j"
 focus_pane_up = "prefix+k"
 focus_pane_right = "prefix+l"
+
+# Disable prefix-free navigate-mode h/j/k/l (and the arrow aliases). In herdr
+# 0.6.x these fire in terminal mode, so plain h/l both moved the nvim cursor
+# AND switched the herdr pane. Empty = handled only via prefix+<key> above.
+navigate_pane_left = ""
+navigate_pane_down = ""
+navigate_pane_up = ""
+navigate_pane_right = ""
 
 # Free prefix+tab for tab cycling (tmux used Tab/BTab for windows)
 cycle_pane_next = ""
