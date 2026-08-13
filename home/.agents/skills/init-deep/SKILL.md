@@ -1,6 +1,6 @@
 ---
 name: init-deep
-description: Generate hierarchical AGENTS.md files for a codebase. Root + complexity-scored subdirectories. Use when user says "init deep", "generate AGENTS.md", "document this repo", wants to create or regenerate project knowledge files, or mentions "knowledge base".
+description: Generate hierarchical AGENTS.md files. Use for "init deep", "generate AGENTS.md", or "document this repo".
 disable-model-invocation: true
 ---
 

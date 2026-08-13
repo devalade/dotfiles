@@ -1,14 +1,6 @@
 ---
 name: fullstack-dev
-description: |
-  Full-stack backend architecture and frontend-backend integration guide.
-  TRIGGER when: building a full-stack app, creating REST API with frontend, scaffolding backend service,
-  building todo app, building CRUD app, building real-time app, building chat app,
-  Express + React, Next.js API, Node.js backend, Python backend, Go backend,
-  designing service layers, implementing error handling, managing config/auth,
-  setting up API clients, implementing auth flows, handling file uploads,
-  adding real-time features (SSE/WebSocket), hardening for production.
-  DO NOT TRIGGER when: pure frontend UI work, pure CSS/styling, database schema only.
+description: Full-stack backend architecture + frontend integration: REST APIs, services, auth, uploads, real-time features.
 license: MIT
 metadata:
   category: full-stack

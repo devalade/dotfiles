@@ -1,3 +1,8 @@
+---
+name: crudify-laravel-crud
+description: Generate full CRUD operations in Laravel with Livewire v4 components.
+---
+
 # Skill: crudify-laravel-crud
 
 Generate full CRUD operations in Laravel with Livewire v4 components.

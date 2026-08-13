@@ -1,6 +1,6 @@
 ---
 name: shipnode
-description: Deploy Node.js apps to a single VPS using the shipnode CLI (zero-downtime releases, PM2, Caddy, SSH). Use when the user asks about deploying, setting up a server, rolling back, configuring Caddy/PM2, managing .env on a remote server, or running shipnode commands.
+description: Deploy Node.js apps to a VPS with shipnode CLI: zero-downtime releases, PM2, Caddy, SSH.
 ---
 
 # shipnode

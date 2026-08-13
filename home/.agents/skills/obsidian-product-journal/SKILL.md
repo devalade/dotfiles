@@ -1,11 +1,6 @@
 ---
 name: obsidian-product-journal
-description: >-
-  Maintain an English Obsidian product journal for technical decisions, what
-  works / what doesn't, monetization, and distribution. Use when the user wants
-  to document product/tech decisions in Obsidian, log learnings, capture
-  pricing/margin notes, map distribution funnels, bootstrap a product folder in
-  their vault, or mentions Obsidian ADRs / product journal notes.
+description: Maintain an English Obsidian product journal for decisions, learnings, monetization, distribution.
 ---
 
 # Obsidian product journal

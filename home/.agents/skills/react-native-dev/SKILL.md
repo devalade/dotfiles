@@ -1,12 +1,6 @@
 ---
 name: react-native-dev
-description: |
-  React Native and Expo development guide covering components, styling, animations, navigation,
-  state management, forms, networking, performance optimization, testing, native capabilities,
-  and engineering (project structure, deployment, SDK upgrades, CI/CD).
-  Use when: building React Native or Expo apps, implementing animations or native UI, managing
-  state, fetching data, writing tests, optimizing performance, deploying to App Store/Play Store,
-  setting up CI/CD, upgrading Expo SDK, or configuring Tailwind/NativeWind.
+description: React Native and Expo dev: components, styling, animations, navigation, state, tests, CI/CD.
 license: MIT
 metadata:
   version: "1.0.0"

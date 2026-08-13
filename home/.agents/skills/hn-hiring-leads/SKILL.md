@@ -1,6 +1,6 @@
 ---
 name: hn-hiring-leads
-description: "Find and shortlist strong contract, freelance, consulting, or fractional-work leads from Hacker News's monthly \"Ask HN: Who is hiring?\" thread. Use when a user wants to source work from HN, match hiring posts to one or more service profiles, identify urgent engineering pain such as broken builds or manual deployments, or save ranked outreach opportunities."
+description: Find contract/freelance/consulting leads from HN's monthly "Ask HN: Who is hiring?" thread.
 ---
 
 # HN Hiring Leads

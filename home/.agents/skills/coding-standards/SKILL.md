@@ -1,6 +1,6 @@
 ---
 name: coding-standards
-description: TypeScript coding standards and design taste. Use when working on TypeScript code; when adding or changing domain models, modules, adapters, parsers, typed errors, async workflows, tests, TypeScript contracts, Cloudflare Workers/Durable Objects/Agents, or Effect code; or when another engineering skill needs the user's coding standards.
+description: TypeScript coding standards and design taste: domain models, modules, errors, async, tests, Cloudflare, Effect.
 ---
 
 # Coding Standards

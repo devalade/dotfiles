@@ -1,6 +1,6 @@
 ---
 name: tanstack-router
-description: Type-safe routing for React and Solid applications with first-class search params, data loading, and seamless integration with the React ecosystem.
+description: Type-safe routing for React/Solid with search params, data loading, and ecosystem integration.
 ---
 
 

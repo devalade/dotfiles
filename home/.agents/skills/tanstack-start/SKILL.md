@@ -1,6 +1,6 @@
 ---
 name: tanstack-start
-description: Full-stack React framework powered by TanStack Router with SSR, streaming, server functions, and deployment to any hosting provider.
+description: Full-stack React via TanStack Router: SSR, streaming, server functions, any-host deployment.
 ---
 
 # TanStack Start Skills

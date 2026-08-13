@@ -1,6 +1,6 @@
 ---
 name: sync-pocock-skills
-description: Sync Matt Pocock's skills from upstream, applying pi-specific patches and handling dependencies and lifecycle migrations.
+description: Sync Matt Pocock's skills from upstream, applying pi-specific patches and migrations.
 disable-model-invocation: true
 ---
 
