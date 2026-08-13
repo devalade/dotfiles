@@ -70,6 +70,7 @@ dot init              # Full setup (brew, stow, bun, ssh, font)
 dot update            # Pull + brew upgrade + restow + pi update + Pocock skills sync
 dot doctor            # Health check
 dot stow              # Resymlink only
+dot kill-port 3000    # Kill process listening on a port
 dot package add X     # Add + install package
 dot skills sync       # Symlink ~/.agents/skills into ~/.codex/skills
 dot gen-ssh-key       # Generate ed25519 key by email domain
