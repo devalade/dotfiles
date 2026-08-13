@@ -1,0 +1,52 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    echo "Usage: kill-port <port>"
+    echo "Find and kill the process(es) listening on a TCP port"
+}
+
+if [[ $# -ne 1 ]]; then
+    usage
+    exit 1
+fi
+
+port="$1"
+
+if ! [[ "$port" =~ ^[0-9]+$ ]]; then
+    echo "Error: port must be a number" >&2
+    exit 1
+fi
+
+if ! command -v lsof >/dev/null 2>&1; then
+    echo "Error: lsof is not installed" >&2
+    exit 1
+fi
+
+pids="$(lsof -ti "tcp:${port}" 2>/dev/null || true)"
+
+if [[ -z "$pids" ]]; then
+    echo "No process found listening on port ${port}"
+    exit 0
+fi
+
+echo "Processes on port ${port}:"
+for pid in $pids; do
+    name="$(ps -p "$pid" -o comm= 2>/dev/null || echo 'unknown')"
+    echo "  PID ${pid} (${name})"
+done
+
+read -r -p "Kill these processes? [y/N] " answer || { echo ""; exit 1; }
+
+if [[ "$answer" =~ ^[Yy] ]]; then
+    for pid in $pids; do
+        if kill -9 "$pid" 2>/dev/null; then
+            echo "Killed PID ${pid}"
+        else
+            echo "Warning: could not kill PID ${pid}" >&2
+        fi
+    done
+else
+    echo "Aborted"
+fi
