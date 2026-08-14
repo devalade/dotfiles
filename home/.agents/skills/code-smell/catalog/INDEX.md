@@ -1,0 +1,280 @@
+- **001** Anemic Models — 'a bunch of attributes'
+- **002** Constants and Magic Numbers — TL;DR: Avoid Magic numbers without explanation. We don't know their source and are afraid to change them.
+- **003** Functions Are Too Long — TL;DR: Refactor and extract functions longer than 5 lines.
+- **004** String Abusers — Too many parsing, exploding, regex, strcomp, strpos and string manipulation functions.
+- **005** Comment Abusers — TL;DR: Leave comments just for important design decisions. Don't explain the obvious.
+- **006** Too Clever Programmer — Remember: AI Assistants make lots of mistakes
+- **007** Boolean Variables — Using boolean variables as flags, exposes accidental implementation and pollutes the code with Ifs.
+- **008** Long Chains Of Collaborations — Making long chains generate coupling and ripple effect.
+- **009** Dead Code — Code that is no longer used or needed.
+- **010** Too Many Arguments — Objects or Functions need too many arguments to work.
+- **011** Subclassification for Code Reuse — Code reuse is good. But subclassing generates a static coupling.
+- **012** Null — Programmers use Null as different flags. It can hint an absence, an undefined value, en error etc.
+- **013** Empty Constructors — TL;DR: Pass the essence to all your objects so they will not need to mutate.
+- **014** God Objects — An object that knows too much or does too much.
+- **015** Missed Preconditions — Assertions, Preconditions, Postconditions and invariants are our allies to avoid invalid objects. Avoiding the
+- **016** Ripple Effect — Small changes yield unexpected problems.
+- **017** Global Functions — Discouraged by Object-Oriented Programming, Many mixed languages support it. And developers abuse them.
+- **018** Static Functions — Yet another global access coupled with laziness.
+- **019** Optional Arguments — Disguised as a friendly shortcut is another coupling smell.
+- **020** Premature Optimization — Planning ahead of time needs a crystal ball no developer has.
+- **021** Anonymous Functions Abusers — Functions, lambdas, closures. So high order, non-declarative, and hot.
+- **022** Helpers — Do you need help? Who are you gonna call?
+- **023** Instance Type Checking — Do you check who are you talking to?
+- **024** Boolean Coercions — Booleans should be just True and False
+- **025** Pattern Abusers — Patterns are awesome. With great powers comes great responsibility.
+- **026** Exceptions Polluting — It is very nice to have lots of different exceptions. Your code is declarative and robust. Or not?
+- **027** Associative Arrays — [Key, values], magic, fast, malleable and error prone.
+- **028** Setters — The first exercise junior programmers do. IDEs, tutorial and senior developers keep teaching them this anti-pa
+- **029** Settings / Configs — Changing system behavior in a control board is the customer's dream. And the software engineer's nightmare.
+- **030** Mocking Business — Mocking is a great aid when testing behavior. Like with many other tools, we are abusing them.
+- **031** Accidental Methods on Business Objects — Adding persistence, serialization, displaying, importing, exporting code to an object bloats its protocol and 
+- **032** Singletons — The most used and (in)famous design pattern in the world is causing us great harm.
+- **033** Abbreviations — Abbreviating is very important so that we look smart and save memory and mind space.
+- **034** Too Many Attributes — A class defines objects with lots of attributes.
+- **035** State as Properties — When an object changes its state the best solution is to change the attribute, isn't it?
+- **036** Switch/case/elseif/else/if statements — First programming lesson: Control structures. Senior developer lesson: avoid them.
+- **037** Protected Attributes — - Sub classification for code reuse purposes.
+- **038** Abstract Names — Avoid too abstract names. Names should have real world meaning
+- **039** new Date() — 70s first tutorial: getCurrentDate(). Piece of Cake. We are in the 20s Time is global no more
+- **040** DTOs — Data Transfer Objects (DTOs) are widely used, and they 'solve' real problems, do they?
+- **041** Regular Expression Abusers — RegEx are a wonderful tool, we should to use them carefully and not to look smart.
+- **042** Warnings/Strict Mode Off — TL;DR: don't ignore warnings and alarms. You will regret it.
+- **043** Concrete Classes Subclassified — Inheritance. Concrete classes. Reuse. A fantastic mix up.
+- **044** Magic Corrections — Compilers are smarter than us. On a Friday night production deploy they betray us.
+- **045** Not Polymorphic — Methods should be interchangeable if they do the same.
+- **046** Repeated Code — DRY is our mantra. Teachers tell us to remove duplication. We need to go beyond.
+- **047** Diagrams — Diagrams are not code. They cannot be a code smell. They are just Diagram Smells.
+- **048** Code Without Standards — The Right example has several other smells, but we keep it loyal to its GIT version in order to show only code
+- **049** Caches — Caches are sexy. They are a one-night stand. We need to avoid them in a long-term relationship.
+- **050** Object Keys — Primary keys, IDs, references. The first attribute we add to our objects. They don't exist in the real world.
+- **051** Double Negatives — Not operator is our friend. Not not operator is not our friend.
+- **052** Fragile Tests — Tests are our safety nets. If we don't trust on their integrity, we will be in great danger.
+- **053** Explicit Iteration — We learned loops back in school. But enumerators and iterators are the next generation.
+- **054** Anchor Boats — - Complexity
+- **055** Object Orgy — If you see your objects as data holders you will violate their encapsulation, but you shouldn't, as in real li
+- **056** Preprocessors — We want our code to behave differently on different environments, and operating systems, so taking decisions a
+- **057** Versioned Functions — sort, sortOld, sort20210117, workingSort, It is great to have them all. Just in case
+- **058** Yo-yo Problem — Searching for a concrete method implementation? Go back and forth, up and down.
+- **059** Basic / Do Functions — sort, doSort, basicSort, doBasicSort, primitiveSort, superBasicPrimitiveSort, who does the real work?
+- **060** Global Classes — Classes are handy. We can call them and invoke them at any time. Is this good?
+- **061** Coupling to Classes — Classes are handy. We can call them and invoke them any time. Is this good?
+- **062** Flag Variables — Flags indicate what happened. Unless their name is too generic.
+- **063** Feature Envy — TL;DR: Don't abuse your friend objects.
+- **064** Inappropriate Intimacy — - Bad Responsibilities Assignments
+- **065** Variables Named after Types — TL;DR: Don't name your variables with the accidental type
+- **066** Shotgun Surgery — - Bad Responsibilities Assignments
+- **067** Middle Man — - Unnecessary Indirection
+- **068** Getters — Getting things is widespread and safe. But it is a very bad practice.
+- **069** Big Bang (JavaScript Ridiculous Castings) — TL;DR: Don't mix booleans with non-booleans.
+- **070** Anemic Model Generators — Anemic Models are the problem. Anemic Model Generators are the Meta Problem.
+- **071** Magic Floats Disguised as Decimals — TL;DR: Don't trust numbers on immature languages like JavaScript.
+- **072** Return Codes — APIs, Return codes, C Programming Language, We've all been there.
+- **073** Exceptions for Expected Cases — Exceptions are handy Gotos and flags. Let's abuse them.
+- **074** Empty Lines — Breaking the code to favor readability asks for refactor.
+- **075** Comments Inside a Method — TL;DR: Don't add comments inside your methods. Extract them and leave declarative comments just for not obviou
+- **076** Generic Assertions — Don't make weak tests to create a false sensation of coverage.
+- **077** Timestamps — Timestamps are widely used. They have a central issuing authority and do not go back, do they?
+- **078** Callback Hell — Processing an algorithm as a sequence of nested callbacks is not clever.
+- **079** TheResult — Indistinct noise words
+- **080** Nested Try/Catch — Exceptions are a great way of separating the happy path from the trouble path. But we tend to over-complicate 
+- **081** Result — result = ???
+- **082** Tests Violating Encapsulation — Objects work fine and fulfill business objectives. But we need to test them. Let's break them.
+- **083** Variables Reassignment — Variable reuse is something we see in big chunks of code.
+- **084** Max &lt; Min (Javascript) — Some functions do not behave as expected. Sadly, most programmers accept them.
+- **085** And Functions — Do not perform more than requested.
+- **086** Mutable Const Arrays — Const declares something to be constant. Can it mutate?
+- **087** Inconsistent Parameters Sorting — Be consistent with the parameters you use. Code is prose.
+- **088** Lazy Initialization — Yet another premature optimization pattern
+- **089** Math Feature Envy — One class calculates formulas for another class.
+- **090** Implementative Callback Events — When creating events, we should decouple the trigger from the action.
+- **091** Test Asserts without Description — We are big fans of xUnit. But we don't care much for the programmers.
+- **092** Isolated Subclasses Names — If your classes are globals, use fully qualified names
+- **093** Send me Anything — Magic functions that can receive a lot of different (and not polymorphic arguments)
+- **094** Too Many imports — If your class relies on too many others, it will be coupled and fragile. A long import list is a good indicato
+- **095** Premature Classification — We are over generalizers. We shouldn't create abstractions until we see enough concretions.
+- **096** My Objects — You don't own objects.
+- **097** Error Messages Without Empathy — We should take special care with error descriptions for the users (and ourselves).
+- **098** Speling Mistakes — Spelling and readability are very important for humans and not important for machines.
+- **099** First Second — How many times do we see lazy argument names?
+- **100** GoTo — GOTO was considered harmful 50 years ago
+- **101** Comparison Against Booleans — When comparing to booleans, we perform magic castings and get unexpected results.
+- **102** Arrow Code — Nested IFs and Elses are very hard to read and test
+- **103** Double Encapsulation — Calling our own accessor methods might seem a good encapsulation idea. But it is not.
+- **104** Assert True — Asserting against booleans makes error tracking more difficult.
+- **105** Comedian Methods — Use professional and meaningful names
+- **106** Production Dependent Code — Don't add IFs checking for production environment.
+- **107** Variables Reuse — TL;DR: Don't read and write the same variable for different purposes
+- **108** Float Assertions — assertEquals()
+- **109** Automatic Properties — TL;DR: Avoid Getters, Avoid Setters, Avoid Metaprogramming. Think about Behavior.
+- **110** Switches With Defaults — TL;DR: Don't add a default clause to your cases. Change it for an exception. Be Explicit.
+- **111** Modifying Collections While Traversing — Changing a collection while traversing might lead to unexpected errors
+- **112** Testing Private Methods — TL;DR: Don't test your private methods.
+- **113** Data Naming — Use entity domain names to model entity domain objects.
+- **114** Empty Class — different behavior
+- **115** Return True — TL;DR: Don't return true or false. Be declarative.
+- **116** Variables Declared With 'var' — TL;DR: Choose wisely your variable names, scope, and mutability.
+- **117** Unrealistic Data — TL;DR: Use real case scenarios and real data (when possible)
+- **118** Return False — TL;DR: Don't return explicit booleans. Most boolean usages are code smells.
+- **119** Stairs Code — TL;DR: Avoid checking for boolean expressions and returning an explicit boolean.
+- **120** Sequential IDs — TL;DR: Don't expose obvious consecutive IDs.
+- **121** String Validations — You need to validate strings. So you don't need strings at all
+- **122** Primitive Obsession — TL;DR: Use small objects instead of primitive ones.
+- **123** Mixed 'What' and 'How' — We love looking at the internal gears of the clock, but we need to start focusing on the hands.
+- **124** Divergent Change — - Code Duplication
+- **125** 'IS-A' Relationship — behaves-as-a
+- **126** Fake Null Object — Null Objects are great alternatives to The Billion Dollar Mistake. Sometimes we don't need them
+- **127** Mutable Constants — You declare something a constant. But you can mutate it.
+- **128** Non-English Coding — TL;DR: Stick to English. Always.
+- **129** Structural Optimizations — TL;DR: Don't optimize anything until you have a real-use scenario benchmark.
+- **130** AddressImpl — TL;DR: Name your classes after real-world concepts.
+- **131** Zero Argument Constructor — TL;DR: Pass all your essential arguments when creating objects.
+- **132** Exception Try Too Broad — TL;DR: Be as specific as possible when handling errors.
+- **133** Hardcoded IF Conditions — TL;DR: Don't leave a hardcoded mess on IFs.
+- **134** Specialized Business Collections — TL;DR: Don't create unnecessary abstractions
+- **135** Interfaces With just One Realization — TL;DR: Don't over-generalize
+- **136** Classes With just One Subclass — Being generic and foreseeing the future is good (again).
+- **137** Inheritance Tree Too Deep — Depth of inheritance tree (DIT)
+- **138** Packages Dependency — TL;DR: Write your code unless you need an existing complex solution
+- **139** Business Code in the User Interface — TL;DR: Always create correct objects in your back-ends. UIs are accidental.
+- **140** Short Circuit Evaluation — TL;DR: Be lazy when evaluating boolean conditions
+- **141** IEngine , AVehicle, ImplCar — TL;DR: Don't prefix or suffix your classes
+- **142** Queries in Constructors — TL;DR: Constructors should construct (and probably initialize) objects.
+- **143** Data Clumps — TL;DR: Make cohesive primitive objects travel together
+- **144** Fungible Objects — TL;DR: Respect the [MAPPER](https://maximilianocontieri.com/what-is-wrong-with-software). Make fungible what i
+- **145** Short Circuit Hack — TL;DR: Don't use Boolean comparison for side effect functions.
+- **146** Getter Comments — TL;DR: Don't use getters. Don't comment getters
+- **147** Too Many Methods — Util classes are great to gather protocol
+- **148** ToDos — TL;DR: Don't leave TODOs in your code. Fix them!
+- **149** Optional Chaining — Our code is more robust and legible. But we hide NULL under the rug
+- **150** Equal Comparison — single point
+- **151** Commented Code — TL;DR: Don't leave commented code. Remove it.
+- **152** Logical Comment — TL;DR: Don't change code semantics to skip code.
+- **153** Too Long Names — TL;DR: Names should be long enough. No longer.
+- **154** Too Many Variables — You debug code and see too many variables declared and active
+- **155** Multiple Promises — TL;DR: Don't block yourself in a sorted way.
+- **156** Implicit Else — TL;DR: Be explicit. Even with Else.
+- **157** Balance at 0 — TL;DR: Null is not 0. Error is not 0. just 0 is 0.
+- **158** Variables not Variable — TL;DR: Be declarative on mutability.
+- **159** mIxEd\_cASe — TL;DR: Don't mix different case conversions
+- **160** Invalid Id = 9999 — TL;DR: Don't couple real IDs with invalid ones. In fact: Avoid IDs.
+- **161** Abstract/Final/Undefined Classes — TL;DR: If your language has the right tool, your classes should be either abstract or final.
+- **162** Too Many Parentheses — TL;DR: Use as few parentheses as possible.
+- **163** Collection in Name — TL;DR: Don't use 'collection' in your name. It is too abstract for concrete concepts.
+- **164** Mixed Indentations — TL;DR: Don't mix indentation styles
+- **165** Empty Exception Blocks — On Error resume next was the first thing I learned in my first job
+- **166** Low-Level Errors on User Interface — TL;DR: Catch your errors. Even the ones you don't expect.
+- **167** Hashing Comparison — TL;DR: If you check for the hash, you should also check for equality
+- **168** Undocumented Decisions — TL;DR: Be declarative on your design or implementation decisions.
+- **169** Glued Methods — TL;DR: Try to be as atomic as possible in your methods
+- **170** Refactor with Functional Changes — Developing is great. refactoring is amazing. Don't make it at the same time
+- **171** Plural Classes — TL;DR: Classes represent concepts. And concepts are singular.
+- **172** Default Argument Values Not Last — TL;DR: Don't use Optional Arguments before mandatory ones. In fact: Don't use Optional Arguments at all
+- **173** Broken Windows — TL;DR: Follow Uncle Bob's boy scout rule.
+- **174** Class Name in Attributes — TL;DR: Don't prefix your attributes with your class name
+- **175** Changes Without Coverage — If your merge request has no test changed, you haven't finished your job
+- **176** Changes in Essence — Mutation is good. Things change
+- **177** Missing Small Objects — TL;DR: Don't forget to model the smallest ones
+- **178** Subsets Violation — EmailAddresses
+- **179** Known Bugs — TL;DR: Don't track bugs. Fix them.
+- **180** BitWise Optimizations — TL;DR: Don't use bitwise operators unless your business model is bitwise logic.
+- **181** Nested Classes — Nested or Pseudo-Private Classes seem great for hiding implementation details.
+- **182** Over Generalization — TL;DR: Don't make generalizations beyond real knowledge.
+- **183** Obsolete Comments — TL;DR: Don't trust comments. They are dead.
+- **184** Exception Arrow Code — TL;DR: Don't cascade your exceptions
+- **185** Evil Regular Expressions — TL;DR: Try to minimize Regular Expression's recursive rules.
+- **186** Hardcoded Business Conditions — TL;DR: Don't add hard business rules to your code.
+- **187** If/Else Backwards — TL;DR: You have the important else condition on the else.
+- **188** Redundant Parameter Names — TL;DR: Don't repeat your parameters' names. Names should be contextual.
+- **189** Not Sanitized Input — TL;DR: Sanitize everything that comes from outside your control.
+- **190** Unnecessary Properties — TL;DR: Don't focus on accidental properties. You won't need many of them.
+- **191** Misplaced Responsibility — TL;DR: Don't be afraid to create or overload the proper objects.
+- **192** Optional Attributes — TL;DR: Collections are fantastic. And Polymorphic.
+- **193** Switch Instead of Formula — TL;DR: Be declarative enough but no more.
+- **194** Missing Interval — TL;DR: Intervals are there. Why use plain dates?
+- **195** Yoda Conditions — TL;DR: In a natural way, write your conditions.
+- **196** Javascript Array Constructors — TL;DR: Be very careful with Javascript Arrays.
+- **197** Gratuitous Context — TL;DR: Don't prefix or suffix your names with irrelevant information
+- **198** Hidden Assumptions — TL;DR: Keep your code explicit
+- **199** Gratuitous Booleans — TL;DR: Check carefully your boolean expressions
+- **200** Poltergeist — An object that appears and disappears mysteriously
+- **201** Nested Ternaries — TL;DR: Don't use nested IFs or nested ternaries
+- **202** God Constant Class — TL;DR: Don't define too many unrelated constants in the same class. Don't pile up the junk together.
+- **203** Irrelevant Test Information — TL;DR: Don't add unnecessary information to your assertions
+- **204** Tests Depending on Dates — TL;DR: Tests must be in full control and you can't manage time.
+- **205** Code in Destructors — TL;DR: Don't use destructors. And don't write functional code there.
+- **206** Long Ternaries — TL;DR: Don't use ternaries for code execution. You should read them as a math formula.
+- **207** Dynamic Methods — TL;DR: Don't add dynamic behavior with metaprogramming
+- **208** Null Island — TL;DR: Don't use null for real places
+- **209** Side Effects — TL;DR: Avoid side effects on your code.
+- **210** Dynamic Properties — TL;DR: Be explicit with your attributes
+- **211** Tab over Spaces — TL;DR: Don't use Tabs. It is not a "personal style decision"
+- **212** Elvis Operator — Your code is not safer using this operator
+- **213** Hoisting — You can prevent undefined
+- **214** Duplicate Parameter Names — TL;DR: Turn on Strict Checks
+- **215** Deserializing Object Vulnerability — TL;DR: Don't allow remote code execution
+- **216** Fat Interface — TL;DR: Split your interfaces
+- **217** Empty Implementation — You create empty methods instead of failing
+- **218** Magic Concatenation — TL;DR: Watch out for fancy language assumptions
+- **219** Looping from index 0 — TL;DR: Start counting from one instead of zero. Like humans do.
+- **220** Return Tuple — TL;DR: Don't return multiple values.
+- **221** Missing Break in Switch — TL;DR: Cases are GOTOs, but you might be missing them
+- **222** Comma Operator — TL;DR: Use comma operator just for loops
+- **223** Racial Naming — TL;DR: Avoid old terms like whitelists, blacklists, master, etc.
+- **224** Deodorant Comments — TL;DR: Don't excuse bad code. Write a clean one!
+- **225** Pass by Reference — pass-by-value
+- **226** Mixed Priorities — TL;DR: Design and test software. It is cheaper than hardware
+- **227** Cowboy Coding — TL;DR: Write code as a team programmer
+- **228** Multiple Classes per File — TL;DR: Follow the separation of concerns principle and file organization
+- **229** Red Tape — TL;DR: Avoid Accidental complexity and bureaucracy
+- **230** Schrödinger Code — TL;DR: Look carefully for race conditions
+- **231** Redundant Data — TL;DR: Say it only once
+- **232** Reusable Code — Don't Repeat Yourself. Don't Repeat Yourself
+- **233** Collections Count — TL;DR: Chose narrow names
+- **234** Long Circuit — TL;DR: Premature Optimization is Evil. Optimization is Good.
+- **235** Console Side Effects — TL;DR: Avoid side effects. Always.
+- **236** Unwrapped Lines — Formatting plays a crucial role in creating code that is not only functional but also readable and maintainabl
+- **237** Attribute Definitions — TL;DR: Never focus on implementation. Focus on behavior instead.
+- **238** Entangled Code — TL;DR: Don't mix your train of thought
+- **239** Big Pull Request — TL;DR: Always stick to baby steps
+- **240** Dead Store — TL;DR: Don't Assign and overwrite values
+- **241** Referential Transparency Violation — TL;DR: Your functions should be replaceable by the computation result.
+- **242** Zombie Feature Flags — Feature flags are evil... and sometimes come back as zombies
+- **243** Concatenated Properties — You join independent information
+- **244** Incomplete Error information — TL;DR: Help yourself and others with correction information
+- **245** exec() and eval() — TL;DR: Don't use metaprogramming. It is not that cool
+- **246** Expiration Date — expiration dates
+- **247** Javascript Replace — TL;DR: Bad function names will lead you to defects
+- **248** Unreliable Copy — TL;DR: Don't rely on external solutions without good handlers
+- **249** Constants as Numbers — TL;DR: Use real-world constants as constants
+- **250** Premature Memoization — strong factual evidence
+- **251** Collections Empty — count() == 0
+- **252** NullCustomer — TL;DR: Prefer real domain names to Implementation names
+- **253** Silent Truncation — TL;DR: If you limit text lengths, enforce them everywhere!
+- **254** Mystery Guest — TL;DR: Be explicit when creating tests to ensure clarity and maintainability
+- **255** Parallel Hierarchies — TL;DR: Parallel hierarchies lead to duplication and tight coupling.
+- **256** Mutable Getters — TL;DR: Don't expose your internals and lose control
+- **257** Name With Collections — TL;DR: Drop "collection" prefix for clarity.
+- **258** Secrets in Code — TL;DR: Use a secret manager to avoid hardcoding sensitive information.
+- **259** Testing with External Resources — TL;DR: Tests must be in full control.
+- **260** Crowdstrike NULL — std::optional
+- **261** DigiCert Underscores — TL;DR: Underscore and special characters can lead to validation errors
+- **262** Not Replaced Constants — TL;DR: Ignoring constant replacement leads to severe security risks.
+- **263** Squatting — TL;DR: Secure your cloud resources by avoiding predictable naming patterns.
+- **264** Hanlon's Razor — TL;DR: Overdefensive code leads to unnecessary complexity.
+- **265** Linguistic Confusion — TL;DR: Naming is hard, don't make it harder with unnecessary accidental complexity.
+- **266** Collection Aliasing — TL;DR: Use immutable collections to prevent unintended side effects.
+- **267** Objects Aliasing — Remember AI Assistants make lots of mistakes
+- **268** Ternary Metaprogramming — Remember AI Assistants make lots of mistakes
+- **269** Low-Level Addition — TL;DR: Ditch the Loops: Write Cleaner Code with Declarative Style
+- **270** Boolean APIs — TL;DR: Replace boolean security flags in APIs with separate, more secure endpoints.
+- **271** The Hollywood Principle — TL;DR: The Hollywood Principle promotes loose coupling by inverting control. High-level components decide when
+- **272** API Chain — TL;DR: Use primitive steps to verify API behavior instead of direct requests.
+- **273** Overengineering — Remember: AI Assistants make lots of mistakes
+- **274** Cascaded Returns — Remember: AI Assistants make lots of mistakes
+- **275** Missing Test Wrong Path — TL;DR: Ensure you fail the test when no exception is thrown in invalid conditions.
+- **276** Untested Regular Expressions — Regex Without Tests is Asking for Trouble - Don't be lazy. It is free with AI!
+- **277** UPPERCASE Acronyms — TL;DR: Treat acronyms like normal words to improve human readability.
+- **278** DirName and File — TL;DR: Use clear names for better code understanding.
+- **279** Loop Premature Optimization — hypothetical
+- **280** Spaghetti Code — TL;DR: GOTO statements create confusing and unmaintainable code
