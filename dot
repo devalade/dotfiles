@@ -1021,6 +1021,12 @@ cmd_skills() {
         sync)
             cmd_skills_sync "$@"
             ;;
+        add)
+            cmd_skills_add "$@"
+            ;;
+        backup)
+            cmd_skills_backup "$@"
+            ;;
         -h|--help|help)
             cmd_skills_help
             ;;
@@ -1051,6 +1057,85 @@ cmd_skills_sync() {
     print_success "Skills synced"
 }
 
+# _skills_lib_sourced: source the shared skills helpers once
+SKILLS_LIB_SOURCED=false
+_skills_ensure_lib() {
+    if [[ "$SKILLS_LIB_SOURCED" != true ]]; then
+        source "${DOTFILES_DIR}/home/.agents/skills-lib.sh"
+        SKILLS_LIB_SOURCED=true
+    fi
+}
+
+cmd_skills_add() {
+    if ! command_exists npx; then
+        print_error "npx not found (required for 'skills add')"
+        return 1
+    fi
+
+    local args=("$@") arg
+    local has_global=false has_yes=false
+    for arg in "$@"; do
+        [[ "$arg" == "-g" || "$arg" == "--global" ]] && has_global=true
+        [[ "$arg" == "-y" || "$arg" == "--yes" ]] && has_yes=true
+    done
+    # dotfiles flow always installs globally so skills land in ~/.agents/skills,
+    # and skips npx's interactive scope confirmation (backup prompt comes next).
+    if [[ "$has_global" != true ]]; then args+=("-g"); fi
+    if [[ "$has_yes" != true ]]; then args+=("-y"); fi
+
+    print_header "Installing skill(s) with npx skills (global)"
+    npx -y skills add "${args[@]}"
+    print_success "Skill installed"
+    echo ""
+    cmd_skills_backup
+}
+
+cmd_skills_backup() {
+    _skills_ensure_lib
+
+    local src="${HOME_DIR}/.agents/skills"
+    local tgt="${HOME}/.agents/skills"
+    local -a names=("$@")
+
+    if [[ ${#names[@]} -eq 0 ]]; then
+        while IFS= read -r name; do
+            names+=("$name")
+        done < <(unvendored_skills "$src" "$tgt")
+    fi
+
+    if [[ ${#names[@]} -eq 0 ]]; then
+        print_success "All skills in ~/.agents/skills are already vendored in dotfiles — nothing to back up"
+        return 0
+    fi
+
+    print_header "Backing up un-vendored skills into dotfiles"
+    echo "Skills in ~/.agents/skills but missing from the dotfiles pool:"
+    for name in "${names[@]}"; do
+        echo "  - $name"
+    done
+    echo ""
+
+    local confirmed=true
+    if [[ -t 0 ]]; then
+        confirmed=false
+        if confirm "Back these up into your dotfiles now?" y; then
+            confirmed=true
+        fi
+    fi
+
+    if [[ "$confirmed" == true ]]; then
+        backup_unvendored_skills "$src" "$tgt" "${names[@]}"
+        if (( _skills_backed_up > 0 )); then
+            print_success "Backed up ${_skills_backed_up} skill(s) into ${src}"
+            print_info "They are untracked in git — run: git add home/.agents/skills then commit to persist them."
+        else
+            print_warning "Nothing copied — the listed skills are symlinks (e.g. ego-browser). Symlink skills can't be vendored; they live outside the pool."
+        fi
+    else
+        print_info "Skipped. They stay in ~/.agents/skills and are preserved on sync."
+    fi
+}
+
 cmd_skills_help() {
     echo -e "${BOLD}${SCRIPT_NAME} skills${RESET} - Cross-agent skill management"
     echo ""
@@ -1060,7 +1145,9 @@ cmd_skills_help() {
     echo ""
     
     echo -e "${BOLD}SUBCOMMANDS:${RESET}"
-    echo "    sync [--force]             Copy ~/.agents/skills to ~/.agents/skills and wire agents"
+    echo "    add <pkg> [npx args]      Install a skill globally via npx skills, then offer to back it up into dotfiles"
+    echo "    backup [names...]         Back up un-vendored live skills (~/.agents/skills) into the dotfiles pool"
+    echo "    sync [--force]            Mirror the dotfiles pool to ~/.agents/skills and wire agents (never deletes un-vendored skills)"
     echo "    help                       Show this help message"
     echo ""
     
@@ -1068,7 +1155,9 @@ cmd_skills_help() {
     echo "    - Canonical skills live in ~/.dotfiles/home/.agents/skills/"
     echo "    - sync copies the pool to ~/.agents/skills/ and symlinks it for Claude, OpenCode, pi"
     echo "    - Codex gets per-skill symlinks so its ~/.codex/skills/.system stays untouched"
-    echo "    - Use --force to replace existing agent skills directories without prompting"
+    echo "    - Skills present only in ~/.agents/skills (e.g. just installed, or generated locally)"
+    echo "      are preserved on sync; you'll be asked whether to back them up into dotfiles"
+    echo "    - Use --force to replace existing agent skill directories without prompting"
     echo ""
 }
 

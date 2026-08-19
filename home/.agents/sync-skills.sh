@@ -8,7 +8,12 @@ set -euo pipefail
 # Usage:
 #   ~/.agents/sync-skills.sh [--force]
 #
-# --force   Replace existing agent skills directories without prompting.
+# Safety: skills that exist in ~/.agents/skills but are not vendored in the
+# dotfiles pool are never deleted. When run interactively it offers to back
+# them up into the dotfiles pool first.
+#
+# --force   Never prompt (agent dirs are still replaced without asking, and
+#           un-vendored skills are still preserved, just not offered a backup).
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 SOURCE_SKILLS="${SCRIPT_DIR}/skills"
@@ -76,9 +81,56 @@ prompt_before_replace() {
 }
 
 # 1. Sync canonical skills to ~/.agents/skills/
+echo ""
 echo "==> Syncing canonical skills pool to $TARGET_SKILLS"
 mkdir -p "$TARGET_SKILLS"
-rsync -a --delete --exclude='.DS_Store' "$SOURCE_SKILLS/" "$TARGET_SKILLS/"
+
+# Safety invariant: never delete live-pool skills that aren't vendored in the
+# dotfiles pool. When interactive, offer to back them up first.
+if [[ -f "${SCRIPT_DIR}/skills-lib.sh" ]]; then
+  source "${SCRIPT_DIR}/skills-lib.sh"
+
+  UNVENDORED=()
+  while IFS= read -r skill_name; do
+    UNVENDORED+=("$skill_name")
+  done < <(unvendored_skills "$SOURCE_SKILLS" "$TARGET_SKILLS")
+
+  if [[ ${#UNVENDORED[@]} -gt 0 ]]; then
+    echo ""
+    echo "NOTE: skills exist in ~/.agents/skills that are NOT in the dotfiles pool:"
+    printf '  - %s\n' "${UNVENDORED[@]}"
+    echo "They will be preserved and never deleted by this sync."
+    if [[ -t 0 && "$FORCE" != true ]]; then
+      echo ""
+      read -r -p "Back them up into your dotfiles ($SOURCE_SKILLS) now? [y/N] " choice
+      case "$choice" in
+        [yY][eE][sS]|[yY])
+          backup_unvendored_skills "$SOURCE_SKILLS" "$TARGET_SKILLS"
+          ;;
+        *)
+          echo "OK, leaving them in place. Run 'dot skills backup' later to vendor them."
+          ;;
+      esac
+      # Recompute: anything just backed up is now vendored and safe to mirror.
+      UNVENDORED=()
+      while IFS= read -r skill_name; do
+        UNVENDORED+=("$skill_name")
+      done < <(unvendored_skills "$SOURCE_SKILLS" "$TARGET_SKILLS")
+    else
+      echo "Non-interactive run: leaving them in place. Use 'dot skills backup' to vendor them."
+    fi
+  fi
+
+  RSYNC_EXCLUDES=("--exclude=.DS_Store")
+  for skill_name in "${UNVENDORED[@]}"; do
+    RSYNC_EXCLUDES+=("--exclude=/$skill_name")
+  done
+  rsync -a --delete "${RSYNC_EXCLUDES[@]}" "$SOURCE_SKILLS/" "$TARGET_SKILLS/"
+else
+  echo "warning: skills-lib.sh not found next to sync-skills.sh; running legacy mirror"
+  echo "  (un-vendored skills in ~/.agents/skills may be deleted) — run 'dot stow' to refresh."
+  rsync -a --delete --exclude='.DS_Store' "$SOURCE_SKILLS/" "$TARGET_SKILLS/"
+fi
 
 # 2. Claude Code
 echo "==> Wiring Claude Code"
