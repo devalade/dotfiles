@@ -363,6 +363,24 @@ await controller.update("Debian")
 expect(events).toEqual(["stop", "install", "verify", "start"])
 ```
 
+## 11. Anti-Slop Lint Discipline
+
+In TypeScript or JavaScript repositories with the anti-slop Oxlint plugin configured, its rules are the mechanical enforcement of this skill's principles. Write code that satisfies them by construction; never suppress a rule, weaken its severity, add an unsafe cast, or launder types to make lint pass. If the repository does not yet have anti-slop configured, use the `install-anti-slop` skill to set it up — and follow the rule semantics below either way.
+
+| This skill's principle | Enforced by |
+| --- | --- |
+| §4 parse and decode `unknown` once at the I/O boundary | `no-unknown-parameters`, `no-unknown-returns`, `no-unknown-type-aliases`, `no-runtime-typeof` |
+| §4 no `any`, `object`, `{}` escape hatches in contracts | `no-unsafe-dictionary-type` |
+| §4 keep the evidence the check proved; do not widen known values | `no-known-value-widening`, `no-widen-then-assert` |
+| §4 assertions are a debt that must be justified | `no-chained-type-assertions`, `require-safety-comment-for-type-assertion` |
+| §3 inputs use owner-provided named types, parsed at their boundary | `no-object-parameters` |
+| §3 typed dispatch behind interfaces, not reflection | `no-reflect-apply`, `no-reflect-get` |
+| §10 tests replace dependencies through real interfaces | `no-module-mocking` |
+| §5 only proven edge cases earn code | `no-conditional-empty-object-spread` |
+| naming is part of the interface | `no-shape-in-symbol-names` |
+
+Resolve findings the way this skill prescribes: prefer inference, `as const`, and `satisfies`; let named owner types and boundary parsing carry the evidence; keep `unknown` visible only at the boundary where it enters.
+
 ## Reading Order
 
 When deeper design work is required, prefer this order:
@@ -380,7 +398,7 @@ When deeper design work is required, prefer this order:
 
 ## Completion Standard
 
-Finish the complete change, run focused verification, delete temporary artifacts, and do one final simplification pass. The result should feel boring, obvious, typed, cohesive, and native to the codebase.
+Finish the complete change, run focused verification, delete temporary artifacts, and do one final simplification pass. The result should feel boring, obvious, typed, cohesive, and native to the codebase — and keep the repository's lint clean without new suppressions.
 
 The combined style is: **happy-path-first, use-case-oriented design with deep modules, type-driven invariants, boundary isolation, and evidence-driven complexity.**
 
