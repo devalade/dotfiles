@@ -83,7 +83,9 @@ rsync -a --delete --exclude='.DS_Store' "$SOURCE_SKILLS/" "$TARGET_SKILLS/"
 # 2. Claude Code
 echo "==> Wiring Claude Code"
 if prompt_before_replace "$HOME/.claude/skills"; then
-  ensure_symlink "$HOME/.claude/skills" "../../.agents/skills"
+  # ~/.claude/skills is one level deep, so the pool is one ".." up (../.agents/skills),
+  # unlike OpenCode and pi which live two levels deep (../../.agents/skills)
+  ensure_symlink "$HOME/.claude/skills" "../.agents/skills"
 fi
 
 # 3. OpenCode
