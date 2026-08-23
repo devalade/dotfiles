@@ -1884,8 +1884,8 @@ cmd_captions() {
 
 _captions_dir() { echo "${DOTFILES_DIR}/home/.config/davinci-captions"; }
 _captions_py() { echo "$(_captions_dir)/captions-handy.py"; }
-_captions_resolve_scripts() { echo "${HOME}/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Workflow Integrations"; }
-_captions_link_target() { echo "$(_captions_resolve_scripts)/Handy Captions.py"; }
+_captions_resolve_scripts() { echo "${HOME}/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts"; }
+_captions_link_target() { echo "$(_captions_resolve_scripts)/Utility/Handy Captions.py"; }
 
 cmd_captions_install() {
     local captions_dir; captions_dir="$(_captions_dir)"
@@ -1907,9 +1907,9 @@ cmd_captions_install() {
         print_info "node_modules already present, skipping install"
     fi
 
-    # 2. Resolve scripts folder + copy (Resolve's script menu does not reliably show symlinks)
+    # 2. Resolve scripts folder + copy (Utility is scanned for the Workspace > Scripts menu)
     print_step 2 "Installing 'Handy Captions.py' into Resolve scripts"
-    mkdir -p "${scripts_dir}"
+    mkdir -p "${scripts_dir}/Utility"
     rm -f "${link}"
     cp -f "${py}" "${link}"
     print_success "Installed: ${link}"
@@ -1930,7 +1930,7 @@ cmd_captions_install() {
     fi
 
     print_success "Captions installed"
-    print_info "Restart DaVinci Resolve, then: Workspace -> Scripts -> Workflow Integrations -> Handy Captions"
+    print_info "Restart DaVinci Resolve, then: Workspace -> Scripts -> Utility -> Handy Captions"
 }
 
 cmd_captions_status() {
@@ -1984,7 +1984,7 @@ cmd_captions_help() {
     echo -e "${BOLD}NOTES:${RESET}"
     echo "    - Transcription: Handy.app local Whisper/Parakeet model (no cloud)"
     echo "    - Media: MediaBunny (mediabunny + @mediabunny/server), no ffmpeg"
-    echo "    - In Resolve: Workspace -> Scripts -> Workflow Integrations -> Handy Captions"
+    echo "    - In Resolve: Workspace -> Scripts -> Utility -> Handy Captions"
 }
 
 cmd_help() {
