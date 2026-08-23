@@ -1,0 +1,136 @@
+#!/usr/bin/env bash
+# tidy — organize loose files in ~/Downloads and ~/Documents
+#
+# Categorization: keyword rules first (rules.sh), then extension buckets.
+# Only top-level files are processed; subdirectories are never touched.
+# Dry-run by default; pass --apply to actually move files.
+
+set -euo pipefail
+
+RULES_FILE="${TIDY_RULES:-${HOME}/.config/tidy/rules.sh}"
+APPLY=false
+TARGETS=(Downloads Documents)
+
+usage() {
+    echo "Usage: tidy [--apply] [--downloads|--documents] [--check]"
+    echo ""
+    echo "  --apply        Move files (default is a dry run)"
+    echo "  --downloads    Only organize ~/Downloads"
+    echo "  --documents    Only organize ~/Documents"
+    echo "  --check        Exit 1 if files would move (for monitoring)"
+}
+
+for arg in "$@"; do
+    case "$arg" in
+        --apply)      APPLY=true ;;
+        --downloads)  TARGETS=(Downloads) ;;
+        --documents)  TARGETS=(Documents) ;;
+        --check)      CHECK=true ;;
+        -h|--help)    usage; exit 0 ;;
+        *) echo "Error: unknown argument: $arg" >&2; usage; exit 1 ;;
+    esac
+done
+
+[[ -f "$RULES_FILE" ]] || { echo "Error: rules file not found: $RULES_FILE" >&2; exit 1; }
+# shellcheck source=/dev/null
+source "$RULES_FILE"
+
+shopt -s nocasematch
+
+ROOTS=()
+for t in "${TARGETS[@]}"; do
+    case "$t" in
+        Downloads)  ROOTS+=("$HOME/Downloads") ;;
+        Documents)  ROOTS+=("$HOME/Documents") ;;
+    esac
+done
+
+moves=0
+
+find_target() {
+    local name="$1" root="$2" lower
+    lower="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')"
+    local ext="${lower##*.}"
+
+    for pat in "${IGNORE_PATTERNS[@]}"; do
+        [[ "$name" =~ $pat ]] && return 1
+    done
+
+    local rules_list=()
+    case "$root" in
+        *Downloads)  rules_list=("${DOWNLOADS_KEYWORDS[@]}") ;;
+        *Documents)  rules_list=("${DOCUMENTS_KEYWORDS[@]}") ;;
+    esac
+    local i
+    for ((i = 0; i < ${#rules_list[@]}; i += 2)); do
+        if [[ "$name" =~ ${rules_list[$i]} ]]; then
+            printf '%s' "${rules_list[$((i + 1))]}"
+            return 0
+        fi
+    done
+
+    rules_list=()
+    case "$root" in
+        *Downloads)  rules_list=("${DOWNLOADS_EXT[@]}") ;;
+        *Documents)  rules_list=("${DOCUMENTS_EXT[@]}") ;;
+    esac
+    for ((i = 0; i < ${#rules_list[@]}; i += 2)); do
+        if [[ " ${rules_list[$i]} " == *" $ext "* ]]; then
+            printf '%s' "${rules_list[$((i + 1))]}"
+            return 0
+        fi
+    done
+
+    return 1
+}
+
+unique_target() {
+    local dest="$1" base="$1" n=2
+    while [[ -e "$dest" ]]; do
+        dest="${base%.*} ($n).${base##*.}"
+        n=$((n + 1))
+    done
+    printf '%s' "$dest"
+}
+
+moved_report=()
+
+for root in "${ROOTS[@]}"; do
+    [[ -d "$root" ]] || continue
+    while IFS= read -r -d '' f; do
+        name="$(basename "$f")"
+        [[ "$name" == .* ]] && continue
+
+        rel="$(find_target "$name" "$root")" || continue
+        dest_dir="${root}/${rel}"
+        dest="${dest_dir}/${name}"
+
+        if [[ -e "$dest" ]]; then
+            dest="$(unique_target "$dest")"
+        fi
+
+        moves=$((moves + 1))
+        moved_report+=("${root##*/}  →  ${rel}/${name}")
+
+        if $APPLY; then
+            mkdir -p "$dest_dir"
+            mv "$f" "$dest"
+        fi
+    done < <(find "$root" -maxdepth 1 -type f -print0)
+done
+
+if [[ ${#moved_report[@]} -gt 0 ]]; then
+    printf '%s\n' "${moved_report[@]}"
+    echo ""
+    if $APPLY; then
+        echo "Moved ${moves} file(s)."
+    else
+        echo "${moves} file(s) would move. Re-run with --apply to apply."
+    fi
+else
+    echo "Nothing to tidy."
+fi
+
+if [[ "${CHECK:-}" == true ]] && [[ $moves -gt 0 ]]; then
+    exit 1
+fi

@@ -1,15 +1,16 @@
 # Handy Captions — local auto-captions for DaVinci Resolve (free)
 
-One click inside free DaVinci Resolve (**Workspace → Scripts → Utility → Handy Captions**) renders your timeline's audio, transcribes it **locally** with the
+One click inside free DaVinci Resolve (**Workspace → Scripts → Utility → Handy Captions**) renders your timeline's audio to a local QuickTime/MP4 file, transcribes it **locally** with the
 [Handy](https://handy.app) desktop app (Parakeet Unified EN 0.6B via Metal) and drops
 captions on the timeline. No Resolve Studio, no cloud, no ffmpeg.
 
 - **Media pipeline** — [MediaBunny](https://mediabunny.dev) (decode, resample to
   16 kHz mono, silence-VAD chunking, WAV chunk writing)
 - **Transcription** — Handy's headless CLI (`handy --transcribe-file`), fully offline
-- **Caption delivery** — native subtitle track when the SRT import probe succeeds,
-  otherwise styled Text+ titles on a new video track; the `.srt` is always exported
-  to `~/Movies/HandyCaptions/<timeline>.srt` for drag-and-drop or upload
+- **Caption delivery** — generated SRT cues imported directly into a dedicated
+  `Handy Captions` subtitle track on the active timeline; re-runs replace that track.
+  The `.srt` is always exported to
+  `~/Movies/HandyCaptions/<timeline>.srt` for drag-and-drop or upload
 
 ## Install
 
@@ -30,8 +31,9 @@ Then restart Resolve (it scans script folders at launch) and run the script.
 
 1. Open your project, select the timeline with speech
 2. **Workspace → Scripts → Utility → Handy Captions**
-3. Watch the Console: render → transcribe (≈ 10–20× real-time on Apple Silicon) → captions
-4. Result: captions on the subtitle track (or Text+ titles on a new video track) +
+3. Watch the Console and the `Handy Captions` marker at the timeline start:
+   render → transcribe (≈ 10–20× real-time on Apple Silicon) → direct timeline injection
+4. Result: captions on the `Handy Captions` subtitle track +
    `~/Movies/HandyCaptions/<timeline>.srt`
 
 Quick sanity check without Resolve: `dot captions test` (synthesizes a speech clip
@@ -49,7 +51,7 @@ CLI returns text without per-segment timestamps.
 | `Py3 is not installed` in Console | Same as above — install the python.org framework |
 | `node/bun not found` | Install Node or Bun, or set `DAVINCI_CAPTIONS_NODE=/path/to/node` in your shell before launching Resolve |
 | Empty captions | The timeline audio has no speech detected (threshold: −38 dBFS, 0.15 s) |
-| Text+ titles instead of subtitle track | The SRT auto-import probe is version-dependent; drag the saved `.srt` onto a subtitle track manually, or edit the Text+ clips in the Inspector |
+| Text+ captions on the timeline | This is the normal, direct-injection path. Edit the `Handy Captions` clips in the Inspector, or drag the saved `.srt` onto a subtitle track manually |
 | Wrong model | `export HANDY_MODEL=<id>` (list ids: `handy --list-models --json`) |
 
 ## Files

@@ -2,8 +2,8 @@ import { readFile } from "node:fs/promises";
 import { isAbsolute, relative, resolve, sep } from "node:path";
 import type { ExtensionAPI, ExtensionContext } from "@earendil-works/pi-coding-agent";
 
-const DEEPSEEK_MODEL = "deepseek-v4-flash";
-const MAX_THINKING_LEVEL = "max" as Parameters<ExtensionAPI["setThinkingLevel"]>[0];
+const LUNA_MODEL = "gpt-5.6-luna";
+const THINKING_LEVEL = "medium" as Parameters<ExtensionAPI["setThinkingLevel"]>[0];
 const MAX_BATCH_FILES = 16;
 const MAX_FILE_BYTES = 200_000;
 const MAX_TOTAL_BYTES = 1_000_000;
@@ -34,20 +34,18 @@ You are an execution-focused coding worker. Optimize for a correct, verified cha
 - Before finishing, report the files changed, checks run, any remaining blocker, and the active model/thinking level.
 `;
 
-function isDeepSeek(ctx: ExtensionContext): boolean {
+function isLuna(ctx: ExtensionContext): boolean {
 	const model = ctx.model;
-	return model?.provider === "opencode-go" && model.id === DEEPSEEK_MODEL;
+	return model?.provider === "opencode-go" && model.id === LUNA_MODEL;
 }
 
-function enforceBestThinking(pi: ExtensionAPI, ctx: ExtensionContext): void {
-	if (!isDeepSeek(ctx)) return;
+function enforceMediumThinking(pi: ExtensionAPI, ctx: ExtensionContext): void {
+	if (!isLuna(ctx)) return;
 
-	// Pi clamps this to the model's supported maximum. For DeepSeek this keeps
-	// the configured worker at its highest available reasoning level.
-	pi.setThinkingLevel(MAX_THINKING_LEVEL);
+	pi.setThinkingLevel(THINKING_LEVEL);
 	ctx.ui.setStatus(
-		"deepseek-execution",
-		`DeepSeek · ${pi.getThinkingLevel()} (max supported) · ${ctx.model?.id ?? DEEPSEEK_MODEL}`,
+		"gpt-luna-execution",
+		`GPT-5.6 Luna · ${pi.getThinkingLevel()} · ${ctx.model?.id ?? LUNA_MODEL}`,
 	);
 }
 
@@ -63,7 +61,7 @@ function projectPath(input: string): string | null {
 	return null;
 }
 
-export default function deepseekExecution(pi: ExtensionAPI) {
+export default function gptLunaExecution(pi: ExtensionAPI) {
 	pi.registerTool({
 		name: "batch_read",
 		label: "Batch Read",
@@ -104,33 +102,33 @@ export default function deepseekExecution(pi: ExtensionAPI) {
 	});
 
 	pi.on("session_start", async (_event, ctx) => {
-		enforceBestThinking(pi, ctx);
+		enforceMediumThinking(pi, ctx);
 	});
 
 	pi.on("model_select", async (_event, ctx) => {
-		enforceBestThinking(pi, ctx);
+		enforceMediumThinking(pi, ctx);
 	});
 
 	pi.on("before_agent_start", async (event, ctx) => {
-		enforceBestThinking(pi, ctx);
+		enforceMediumThinking(pi, ctx);
 
-		if (!isDeepSeek(ctx)) return;
+		if (!isLuna(ctx)) return;
 
 		return {
 			systemPrompt: `${event.systemPrompt}\n${EXECUTION_POLICY}`,
 		};
 	});
 
-	pi.registerCommand("deepseek-execution", {
-		description: "Show or restore DeepSeek's strongest execution settings",
+	pi.registerCommand("gpt-luna-execution", {
+		description: "Show or restore GPT-5.6 Luna's worker execution settings",
 		handler: async (_args, ctx) => {
-			if (!isDeepSeek(ctx)) {
-				ctx.ui.notify("The active model is not opencode-go/deepseek-v4-flash.", "warning");
+			if (!isLuna(ctx)) {
+				ctx.ui.notify("The active model is not opencode-go/gpt-5.6-luna.", "warning");
 				return;
 			}
 
-			enforceBestThinking(pi, ctx);
-			ctx.ui.notify(`DeepSeek execution mode: ${pi.getThinkingLevel()}`, "info");
+			enforceMediumThinking(pi, ctx);
+			ctx.ui.notify(`GPT-5.6 Luna execution mode: ${pi.getThinkingLevel()}`, "info");
 		},
 	});
 }

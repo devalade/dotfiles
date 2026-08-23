@@ -1,0 +1,62 @@
+#!/usr/bin/env bash
+# tidy-daily — morning cleanup: prompts a dedicated OpenCode session via the
+# background server API (pattern: opencode dev video "background server").
+# The session is created once and its ID is persisted; every run reuses it so
+# the history/context accumulates. Safe for launchd: non-interactive.
+set -euo pipefail
+
+STATE_FILE="${HOME}/.config/tidy/session.id"
+SESSION_TITLE="daily tidy"
+PROMPT="Daily cleanup. Load the tidy-organize skill and run the morning organization routine for ~/Downloads and ~/Documents."
+
+LOG_PREFIX="[tidy-daily $(date '+%Y-%m-%d %H:%M:%S')]"
+log() { printf '%s %s\n' "$LOG_PREFIX" "$*"; }
+
+export PATH="/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin:${HOME}/.local/bin:${HOME}/.opencode/bin:${PATH:-}"
+
+# opencode2 is a global npm install under nvm/Herd — not on launchd's default PATH
+OC_BIN="$(command -v opencode2 2>/dev/null || true)"
+if [[ -z "$OC_BIN" ]]; then
+  for d in "${HOME}"/Library/Application\ Support/Herd/config/nvm/versions/node/*/bin; do
+    if [[ -x "$d/opencode2" ]]; then
+      OC_BIN="$d/opencode2"
+      break
+    fi
+  done
+fi
+if [[ -z "$OC_BIN" ]]; then
+  log "error: opencode2 not found"
+  exit 1
+fi
+log "using $OC_BIN"
+
+# Create the dedicated session once, persist its ID
+if [[ ! -f "$STATE_FILE" ]]; then
+  log "creating dedicated session '$SESSION_TITLE'"
+  resp="$("$OC_BIN" api post /api/session --data "{\"title\": \"$SESSION_TITLE\", \"location\": {\"directory\": \"$HOME\"}}")"
+  sid="$(printf '%s' "$resp" | python3 -c "import json,sys; print(json.load(sys.stdin)['data']['id'])")"
+  if [[ -z "$sid" ]]; then
+    log "error: could not create session: $resp"
+    exit 1
+  fi
+  mkdir -p "$(dirname "$STATE_FILE")"
+  printf '%s' "$sid" > "$STATE_FILE"
+  log "session created: $sid"
+fi
+
+opencode2_api() {
+  "$OC_BIN" api "$@"
+}
+
+sid="$(cat "$STATE_FILE")"
+log "prompting session $sid"
+
+opencode2_api post "/api/session/$sid/prompt" \
+  --data "{\"text\": $(python3 -c "import json,sys; print(json.dumps(sys.argv[1]))" "$PROMPT"), \"delivery\": \"queue\"}" >/dev/null
+
+# Block until the agent loop goes idle, then report status
+if opencode2_api post "/api/session/$sid/wait" >/dev/null 2>&1; then
+  log "done"
+else
+  log "warn: wait failed (session may still be running)"
+fi

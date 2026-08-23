@@ -62,10 +62,14 @@ async function decodeWav(wavPath) {
   const chunks = [];
   let rate = 0, channels = 0;
   for await (const s of sink.samples()) {
-    rate = s.sampleRate; channels = s.numberOfChannels;
-    const buf = new Float32Array(s.numberOfFrames * s.numberOfChannels);
-    s.copyTo(buf, { format: 'f32', planeIndex: 0 }); // interleaved (stereo-safe)
-    chunks.push(buf);
+    try {
+      rate = s.sampleRate; channels = s.numberOfChannels;
+      const buf = new Float32Array(s.numberOfFrames * s.numberOfChannels);
+      s.copyTo(buf, { format: 'f32', planeIndex: 0 }); // interleaved (stereo-safe)
+      chunks.push(buf);
+    } finally {
+      s.close();
+    }
   }
   await input.dispose?.();
   const data = new Float32Array(chunks.reduce((n, c) => n + c.length, 0));
@@ -80,10 +84,15 @@ async function writeWav(samples, rate, channels, outPath) {
   const src = new AudioSampleSource({ codec: 'pcm-s16', numberOfChannels: channels, sampleRate: rate });
   out.addAudioTrack(src);
   await out.start();
-  await src.add(new AudioSample({
+  const sample = new AudioSample({
     data: new Uint8Array(samples.buffer), format: 'f32',
     numberOfChannels: channels, sampleRate: rate, timestamp: 0,
-  }));
+  });
+  try {
+    await src.add(sample);
+  } finally {
+    sample.close();
+  }
   await out.finalize();
 }
 
@@ -112,9 +121,18 @@ async function to16kMono(inWav, mixWav) {
   out.addAudioTrack(src);
   await out.start();
   let frames = 0;
+  let firstTimestamp = null;
   for await (const s of sink.samples()) {
-    frames += s.numberOfFrames;
-    await src.add(s);
+    try {
+      frames += s.numberOfFrames;
+      // Resolve's H.264/MP4 audio starts slightly before zero (e.g. -44 ms).
+      // MediaBunny's WAV muxer requires non-negative timestamps.
+      if (firstTimestamp === null) firstTimestamp = s.timestamp;
+      s.setTimestamp(Math.max(0, s.timestamp - firstTimestamp));
+      await src.add(s);
+    } finally {
+      s.close();
+    }
   }
   await out.finalize();
   await input.dispose?.();
@@ -166,6 +184,39 @@ function srtTime(t) {
   return `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')},${String(r).padStart(3, '0')}`;
 }
 
+/** Split one transcription span into fast, readable captions of at most two words. */
+function splitIntoWordCues(start, end, text) {
+  const words = text.trim().split(/\s+/).filter(Boolean);
+  const groups = [];
+  let group = [];
+  let groupStart = 0;
+  const flush = (endWord) => {
+    if (group.length) {
+      groups.push({ startWord: groupStart, endWord, text: group.join(' ') });
+      group = [];
+      groupStart = endWord;
+    }
+  };
+  for (let index = 0; index < words.length; index++) {
+    const rawWord = words[index];
+    const hasComma = /,["')\]]*$/.test(rawWord);
+    const endsSentence = /[.!?]["')\]]*$/.test(rawWord);
+    // The word immediately before a comma is always shown by itself.
+    if (hasComma && group.length) flush(index);
+    const displayedWord = rawWord.replace(/[.,!?;:…]/g, '');
+    if (displayedWord) group.push(displayedWord);
+    if (hasComma || endsSentence || group.length === 2 || index === words.length - 1) {
+      flush(index + 1);
+    }
+  }
+  const duration = Math.max(0.01, end - start);
+  return groups.map((group) => ({
+    start: start + duration * (group.startWord / words.length),
+    end: start + duration * (group.endWord / words.length),
+    text: group.text,
+  }));
+}
+
 // ---------------------------------------------------------------------------
 // Main
 // ---------------------------------------------------------------------------
@@ -213,7 +264,7 @@ try {
     await writeWav(f32, rate, 1, chunkWav);
     const text = transcribeChunk(chunkWav);
     rmSync(chunkWav, { force: true });
-    if (text) cues.push({ start: s, end: Math.min(e, data.length / rate), text });
+    if (text) cues.push(...splitIntoWordCues(s, Math.min(e, data.length / rate), text));
     log(`[${i + 1}/${chunks.length}] ${s.toFixed(2)}–${e.toFixed(2)}s → ${text ? `${text.length} chars` : 'skipped (empty)'}`);
   }
 

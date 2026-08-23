@@ -1,0 +1,38 @@
+#!/usr/bin/env bash
+
+set -euo pipefail
+
+usage() {
+    echo "Usage: tunnel [PORT|URL]"
+    echo "Expose a local service via a Cloudflare Quick Tunnel (random *.trycloudflare.com URL)"
+    echo ""
+    echo "Examples:"
+    echo "  tunnel            # http://localhost:3000"
+    echo "  tunnel 5173       # Vite dev server"
+    echo "  tunnel https://localhost:8080"
+}
+
+if [[ "${1:-}" == "-h" || "${1:-}" == "--help" ]]; then
+    usage
+    exit 0
+fi
+
+if ! command -v cloudflared >/dev/null 2>&1; then
+    echo "Error: cloudflared not installed (brew install cloudflared)" >&2
+    exit 1
+fi
+
+target="http://localhost:3000"
+if [[ $# -ge 1 ]]; then
+    if [[ "$1" == *"://"* ]]; then
+        target="$1"
+    elif [[ "$1" =~ ^[0-9]+$ ]]; then
+        target="http://localhost:${1}"
+    else
+        echo "Error: expected a port or URL, got '$1'" >&2
+        exit 1
+    fi
+fi
+
+echo "Tunneling ${target} ... (Ctrl+C to stop)"
+exec cloudflared tunnel --url "$target"

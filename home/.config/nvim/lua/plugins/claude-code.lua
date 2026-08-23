@@ -22,7 +22,7 @@ return {
       {
         "<leader>to",
         function()
-          Snacks.terminal.toggle("opencode --dangerously-skip-permissions", {
+          Snacks.terminal.toggle("opencode2 --auto", {
             win = vim.tbl_extend("force", float_win, { title = " OpenCode " }),
           })
         end,

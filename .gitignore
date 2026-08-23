@@ -60,6 +60,7 @@ home/.config/davinci-captions/node_modules/
 !home/.pi/agent/extensions/
 !home/.pi/agent/extensions/**
 !home/.pi/agent/mcp.json
+!home/.pi/agent/AGENTS.md
 !home/.pi/agent/APPEND_SYSTEM.md
 !home/.pi/agent/skills
 !home/.pi/agent/skills/

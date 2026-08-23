@@ -44,6 +44,7 @@ macOS dev env via GNU Stow. Neovim + Tmux + Git + pi. (Shell: zsh, user-managed)
 | Global skill | `home/.agents/skills/<name>/SKILL.md` |
 | Sync skills to all agents | `dot skills sync` |
 | Pi settings | `home/.pi/agent/settings.json` |
+| Grok worker rule | `home/.grok/rules/pi-worker.md` |
 | Work git identity | Auto via `home/.config/git/work_config` for `~/Code/work/` |
 | Resolve captions | `home/.config/davinci-captions/` (Handy + MediaBunny, no ffmpeg) |
 
@@ -74,6 +75,9 @@ dot stow              # Resymlink only
 dot package add X     # Add + install package
 dot skills sync       # Symlink ~/.agents/skills into ~/.codex/skills
 dot gen-ssh-key       # Generate ed25519 key by email domain
+tidy                  # Dry-run Downloads/Documents organizer (tidy --apply to move)
+/tidy                 # OpenCode command: dry-run plan, then apply via agent
+dot tidy install      # Daily 09:00 cleanup: launchd → API prompt to dedicated session
 dot captions install  # Local captions for Resolve free: deps + script link + Handy check
 ```
 
@@ -85,6 +89,9 @@ dot captions install  # Local captions for Resolve free: deps + script link + Ha
 | Tmux | `tmux.conf` | Prefix `C-;`, auto-installs TPM |
 | Git | `config` | SSH signing, `pull.rebase`, conditional include |
 | Starship | `starship.toml` | 2s timeout (Vite+ shims), custom.scm after dir |
+| Tidy | `tidy/rules.sh` | Downloads/Documents organizer (keyword + ext buckets) |
+| Tidy skill | `home/.agents/skills/tidy-organize/` | Context: user, structure, safety rules |
+| Daily cleanup | `dot tidy install` | LaunchAgent → API prompt to dedicated session, 09:00 |
 | Pi | `settings.json` | Default provider: opencode.cloudflare.dev, Catppuccin theme |
 
 ## UNIQUE STYLES

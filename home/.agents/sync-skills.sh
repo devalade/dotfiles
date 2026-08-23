@@ -15,7 +15,7 @@ set -euo pipefail
 # --force   Never prompt (agent dirs are still replaced without asking, and
 #           un-vendored skills are still preserved, just not offered a backup).
 
-SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+SCRIPT_DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 SOURCE_SKILLS="${SCRIPT_DIR}/skills"
 TARGET_SKILLS="${HOME}/.agents/skills"
 FORCE=false
