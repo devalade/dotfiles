@@ -1929,6 +1929,14 @@ cmd_captions_install() {
         print_success "Model available: ${model_id}"
     fi
 
+    # 4. Resolve Python framework (macOS free builds need python.org, not Homebrew)
+    if [[ -d "/Library/Frameworks/Python.framework" ]]; then
+        print_success "Python framework present (Resolve will detect it)"
+    else
+        print_warning "No python.org framework found - Resolve 20 skips the Scripts menu without it"
+        print_info "Install Python 3.13.x from https://www.python.org/downloads/macos/, then restart Resolve"
+    fi
+
     print_success "Captions installed"
     print_info "Restart DaVinci Resolve, then: Workspace -> Scripts -> Utility -> Handy Captions"
 }
@@ -1954,6 +1962,13 @@ cmd_captions_status() {
         print_success "Handy binary: ${handy_bin}"
     else
         print_warning "Handy app not found at ${handy_bin}"
+    fi
+    if [[ -d "/Library/Frameworks/Python.framework" ]]; then
+        local pyver; pyver="$(ls /Library/Frameworks/Python.framework/Versions/ 2>/dev/null | grep -E '^3\.(9|1[0-3])$' | sort -V | tail -1)"
+        print_success "Resolve Python framework found (${pyver:->3.13?}) at /Library/Frameworks/Python.framework"
+    else
+        print_warning "python.org framework missing: Resolve 20 on macOS needs one at /Library/Frameworks/Python.framework (Homebrew Python is ignored)"
+        print_info "Install: https://www.python.org/downloads/macos/ (Python 3.13.x) or: curl -L -o ~/Downloads/python-3.13.pkg https://www.python.org/ftp/python/3.13.15/python-3.13.15-macos11.pkg && sudo installer -pkg ~/Downloads/python-3.13.pkg -target /"
     fi
 }
 

@@ -42,6 +42,8 @@ CLI returns text without per-segment timestamps.
 | Symptom | Fix |
 |---|---|
 | Script missing from the menu | Quit + relaunch Resolve after `dot captions install`; check the file in `~/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Utility/` |
+| No "Scripts" entry under Workspace | Resolve 20 (macOS) needs the **python.org** framework at `/Library/Frameworks/Python.framework` — Homebrew Python is ignored. Install Python 3.13.x from python.org, restart Resolve |
+| `Py3 is not installed` in Console | Same as above — install the python.org framework |
 | `node/bun not found` | Install Node or Bun, or set `DAVINCI_CAPTIONS_NODE=/path/to/node` in your shell before launching Resolve |
 | Empty captions | The timeline audio has no speech detected (threshold: −38 dBFS, 0.15 s) |
 | Text+ titles instead of subtitle track | The SRT auto-import probe is version-dependent; drag the saved `.srt` onto a subtitle track manually, or edit the Text+ clips in the Inspector |
