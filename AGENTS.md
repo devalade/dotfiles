@@ -45,6 +45,7 @@ macOS dev env via GNU Stow. Neovim + Tmux + Git + pi. (Shell: zsh, user-managed)
 | Sync skills to all agents | `dot skills sync` |
 | Pi settings | `home/.pi/agent/settings.json` |
 | Work git identity | Auto via `home/.config/git/work_config` for `~/Code/work/` |
+| Resolve captions | `home/.config/davinci-captions/` (Handy + MediaBunny, no ffmpeg) |
 
 ## CONVENTIONS
 
@@ -73,6 +74,7 @@ dot stow              # Resymlink only
 dot package add X     # Add + install package
 dot skills sync       # Symlink ~/.agents/skills into ~/.codex/skills
 dot gen-ssh-key       # Generate ed25519 key by email domain
+dot captions install  # Local captions for Resolve free: deps + script link + Handy check
 ```
 
 ## KEY CONFIGS

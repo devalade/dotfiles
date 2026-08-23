@@ -1865,6 +1865,131 @@ cmd_obsidian_status() {
     fi
 }
 
+cmd_captions() {
+    local subcommand="${1:-help}"
+    shift || true
+
+    case "$subcommand" in
+        install)  cmd_captions_install "$@" ;;
+        status)   cmd_captions_status "$@" ;;
+        uninstall) cmd_captions_uninstall "$@" ;;
+        -h|--help|help) cmd_captions_help ;;
+        *)
+            print_error "Unknown captions subcommand: $subcommand"
+            print_info "Run '${SCRIPT_NAME} captions help' for usage"
+            return 1
+            ;;
+    esac
+}
+
+_captions_dir() { echo "${DOTFILES_DIR}/home/.config/davinci-captions"; }
+_captions_py() { echo "$(_captions_dir)/captions-handy.py"; }
+_captions_resolve_scripts() { echo "${HOME}/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Workflow Integrations"; }
+_captions_link_target() { echo "$(_captions_resolve_scripts)/Handy Captions.py"; }
+
+cmd_captions_install() {
+    local captions_dir; captions_dir="$(_captions_dir)"
+    local py; py="$(_captions_py)"
+    local scripts_dir; scripts_dir="$(_captions_resolve_scripts)"
+    local link; link="$(_captions_link_target)"
+
+    TOTAL_STEPS=3
+    print_header "Installing Handy Captions (DaVinci Resolve free)"
+
+    # 1. npm deps
+    if [[ ! -d "${captions_dir}/node_modules" ]]; then
+        print_step 1 "Installing mediabunny deps"
+        (cd "${captions_dir}" && if command_exists bun; then bun install --no-progress; else npm install --no-audit --no-fund; fi) || {
+            print_error "npm install failed in ${captions_dir}"
+            return 1
+        }
+    else
+        print_info "node_modules already present, skipping install"
+    fi
+
+    # 2. Resolve scripts folder + symlink
+    print_step 2 "Linking 'Handy Captions.py' into Resolve scripts"
+    mkdir -p "${scripts_dir}"
+    if [[ -e "${link}" && ! -L "${link}" ]]; then
+        print_error "${link} exists and is not a symlink - remove it manually first"
+        return 1
+    fi
+    ln -sfn "${py}" "${link}"
+    print_success "Linked: ${link}"
+
+    # 3. Verify Handy + model
+    print_step 3 "Verifying Handy CLI + Parakeet model"
+    local handy_bin="${HANDY_BIN:-/Applications/Handy.app/Contents/MacOS/handy}"
+    if [[ ! -x "${handy_bin}" ]]; then
+        print_error "Handy app not found at ${handy_bin} (set HANDY_BIN to override)"
+        return 1
+    fi
+    print_success "Handy binary: ${handy_bin}"
+    local model_id="${HANDY_MODEL:-handy-computer/parakeet-unified-en-0.6b-gguf/parakeet-unified-en-0.6b-Q8_0.gguf}"
+    if ! "${handy_bin}" --list-models --json 2>/dev/null | grep -q "${model_id}"; then
+        print_warning "Model not found in Handy's registry (id: ${model_id}); open Handy and download it once"
+    else
+        print_success "Model available: ${model_id}"
+    fi
+
+    print_success "Captions installed"
+    print_info "Restart DaVinci Resolve, then: Workspace -> Scripts -> Workflow Integrations -> Handy Captions"
+}
+
+cmd_captions_status() {
+    local py; py="$(_captions_py)"
+    local link; link="$(_captions_link_target)"
+    local captions_dir; captions_dir="$(_captions_dir)"
+
+    print_header "Handy Captions status"
+    if [[ -L "${link}" ]]; then
+        print_success "Resolve script linked: ${link}"
+    else
+        print_warning "Resolve script not linked - run '${SCRIPT_NAME} captions install'"
+    fi
+    if [[ -d "${captions_dir}/node_modules" ]]; then
+        print_success "node_modules present"
+    else
+        print_warning "node_modules missing - run '${SCRIPT_NAME} captions install'"
+    fi
+    local handy_bin="${HANDY_BIN:-/Applications/Handy.app/Contents/MacOS/handy}"
+    if [[ -x "${handy_bin}" ]]; then
+        print_success "Handy binary: ${handy_bin}"
+    else
+        print_warning "Handy app not found at ${handy_bin}"
+    fi
+}
+
+cmd_captions_uninstall() {
+    local link; link="$(_captions_link_target)"
+    print_header "Uninstalling Handy Captions"
+    if [[ -L "${link}" ]]; then
+        rm "${link}"
+        print_success "Removed ${link}"
+    else
+        print_info "No symlink found - nothing to remove"
+    fi
+    print_info "Keep node_modules? Remove ${DOTFILES_DIR}/home/.config/davinci-captions/node_modules manually if unwanted"
+}
+
+cmd_captions_help() {
+    echo -e "${BOLD}${SCRIPT_NAME} captions${RESET} - Local auto-captions for DaVinci Resolve (free)"
+    echo ""
+    echo -e "${BOLD}USAGE:${RESET}"
+    echo "    ${SCRIPT_NAME} captions [SUBCOMMAND]"
+    echo ""
+    echo -e "${BOLD}SUBCOMMANDS:${RESET}"
+    echo "    install      Install deps + link script into Resolve + verify Handy"
+    echo "    status       Show link/deps/Handy state"
+    echo "    uninstall    Remove the Resolve script link"
+    echo "    help         Show this help message"
+    echo ""
+    echo -e "${BOLD}NOTES:${RESET}"
+    echo "    - Transcription: Handy.app local Whisper/Parakeet model (no cloud)"
+    echo "    - Media: MediaBunny (mediabunny + @mediabunny/server), no ffmpeg"
+    echo "    - In Resolve: Workspace -> Scripts -> Workflow Integrations -> Handy Captions"
+}
+
 cmd_help() {
     echo -e "${BOLD}${SCRIPT_NAME}${RESET} - Dotfiles management tool"
     echo "Version: ${VERSION}"
@@ -1911,6 +2036,7 @@ cmd_help() {
     echo "    ${SCRIPT_NAME} retry-failed              # Retry any failed installations"
     echo "    ${SCRIPT_NAME} skills sync               # Sync ~/.agents/skills to Codex"
     echo "    ${SCRIPT_NAME} obsidian install          # Hourly Obsidian vault sync"
+    echo "    ${SCRIPT_NAME} captions install          # Local Handy captions for Resolve free"
     echo "    ${SCRIPT_NAME} gen-ssh-key               # Generate SSH key (prompts for email)"
     echo "    ${SCRIPT_NAME} gen-ssh-key user@github.com  # Generate SSH key with email"
     echo "    ${SCRIPT_NAME} stow                      # Create symlinks for dotfiles"
@@ -1983,6 +2109,9 @@ main() {
             ;;
         obsidian)
             cmd_obsidian "$@"
+            ;;
+        captions)
+            cmd_captions "$@"
             ;;
         check-packages)
             cmd_check_packages "$@"
