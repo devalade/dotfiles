@@ -34,6 +34,9 @@ Then restart Resolve (it scans script folders at launch) and run the script.
 4. Result: captions on the subtitle track (or Text+ titles on a new video track) +
    `~/Movies/HandyCaptions/<timeline>.srt`
 
+Quick sanity check without Resolve: `dot captions test` (synthesizes a speech clip
+and runs the exact pipeline) or `dot captions test /path/to/video.mp4`.
+
 Caption timing comes from silence analysis (phrases up to 8 s), because Handy's batch
 CLI returns text without per-segment timestamps.
 

@@ -24,7 +24,7 @@
  */
 import { registerMediabunnyServer } from '@mediabunny/server';
 import {
-  Input, WAVE, WavOutputFormat, FilePathSource, FilePathTarget,
+  Input, WAVE, MP4, QTFF, MP3, WavOutputFormat, FilePathSource, FilePathTarget,
   Output, AudioSampleSink, AudioSampleSource, AudioSample,
 } from 'mediabunny';
 import { spawnSync } from 'node:child_process';
@@ -54,7 +54,7 @@ const log = (...a) => console.error('[captions]', ...a);
 
 /** Decode a WAV into interleaved float32 samples. Returns {data, rate, channels}. */
 async function decodeWav(wavPath) {
-  const input = new Input({ source: new FilePathSource(wavPath), formats: [WAVE] });
+  const input = new Input({ source: new FilePathSource(wavPath), formats: [WAVE, MP4, QTFF, MP3] });
   if (!(await input.canRead())) throw new Error(`Cannot read WAV: ${wavPath}`);
   const track = await input.getPrimaryAudioTrack();
   if (!track) throw new Error(`No audio track in ${wavPath}`);
@@ -101,7 +101,7 @@ function transcribeChunk(chunkWav) {
 // Pass 1: resample / downmix any input WAV to 16 kHz mono via `transform`
 // ---------------------------------------------------------------------------
 async function to16kMono(inWav, mixWav) {
-  const input = new Input({ source: new FilePathSource(inWav), formats: [WAVE] });
+  const input = new Input({ source: new FilePathSource(inWav), formats: [WAVE, MP4, QTFF, MP3] });
   const track = await input.getPrimaryAudioTrack();
   const sink = new AudioSampleSink(track);
   const out = new Output({ format: new WavOutputFormat(), target: new FilePathTarget(mixWav) });

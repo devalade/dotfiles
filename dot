@@ -1871,6 +1871,7 @@ cmd_captions() {
 
     case "$subcommand" in
         install)  cmd_captions_install "$@" ;;
+        test)     cmd_captions_test "$@" ;;
         status)   cmd_captions_status "$@" ;;
         uninstall) cmd_captions_uninstall "$@" ;;
         -h|--help|help) cmd_captions_help ;;
@@ -1984,6 +1985,52 @@ cmd_captions_uninstall() {
     print_info "Keep node_modules? Remove ${DOTFILES_DIR}/home/.config/davinci-captions/node_modules manually if unwanted"
 }
 
+cmd_captions_test() {
+    local captions_dir; captions_dir="$(_captions_dir)"
+    local node_bin=""
+    for c in node bun "${HOME}/.bun/bin/bun" /opt/homebrew/bin/node /usr/local/bin/node; do
+        if command -v "$c" >/dev/null 2>&1 || [[ -x "$c" ]]; then node_bin="$c"; break; fi
+    done
+    if [[ -z "$node_bin" ]]; then
+        print_error "node/bun not found - install Node or Bun first"
+        return 1
+    fi
+
+    print_header "Handy Captions smoke test"
+    local tmp input
+    tmp="$(mktemp -d /tmp/handy-captions-test.XXXXXX)"
+    input="${1:-}"
+    if [[ -z "$input" || ! -f "$input" ]]; then
+        print_info "No audio/video file given - generating a short speech test with 'say'"
+        input="${tmp}/speech.wav"
+        say -o "${tmp}/speech.aiff" "Testing one two three. Handy captions are working fine."
+        afconvert -f WAVE -d LEI16@16000 -c 1 "${tmp}/speech.aiff" "$input" 2>/dev/null || {
+            print_error "Could not generate test audio (say/afconvert missing?)"
+            rm -rf "${tmp}"
+            return 1
+        }
+    else
+        print_info "Testing with: ${input}"
+    fi
+
+    local started elapsed n_cues
+    started="$SECONDS"
+    if ! "$node_bin" "${captions_dir}/captions-node.mjs" "$input" "${tmp}/captions.srt" "${tmp}/cues.json"; then
+        print_error "Pipeline failed - see output above"
+        rm -rf "${tmp}"
+        return 1
+    fi
+    elapsed=$((SECONDS - started))
+    n_cues="$(grep -c -- '-->' "${tmp}/captions.srt" 2>/dev/null || echo 0)"
+    print_success "Transcription OK: ${n_cues} cue(s) in ${elapsed}s"
+    local first_cue; first_cue="$(sed -n '3p' "${tmp}/captions.srt")"
+    if [[ -n "$first_cue" ]]; then
+        print_info "First cue: ${first_cue}"
+    fi
+    print_success "Handy + MediaBunny pipeline works - the Resolve script uses the same code"
+    rm -rf "${tmp}"
+}
+
 cmd_captions_help() {
     echo -e "${BOLD}${SCRIPT_NAME} captions${RESET} - Local auto-captions for DaVinci Resolve (free)"
     echo ""
@@ -1992,6 +2039,7 @@ cmd_captions_help() {
     echo ""
     echo -e "${BOLD}SUBCOMMANDS:${RESET}"
     echo "    install      Install deps + copy script into Resolve + verify Handy"
+    echo "    test         Smoke-test the pipeline (optionally: dot captions test FILE)"
     echo "    status       Show installed file/deps/Handy state"
     echo "    uninstall    Remove the Resolve script copy"
     echo "    help         Show this help message"
