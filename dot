@@ -1907,15 +1907,12 @@ cmd_captions_install() {
         print_info "node_modules already present, skipping install"
     fi
 
-    # 2. Resolve scripts folder + symlink
-    print_step 2 "Linking 'Handy Captions.py' into Resolve scripts"
+    # 2. Resolve scripts folder + copy (Resolve's script menu does not reliably show symlinks)
+    print_step 2 "Installing 'Handy Captions.py' into Resolve scripts"
     mkdir -p "${scripts_dir}"
-    if [[ -e "${link}" && ! -L "${link}" ]]; then
-        print_error "${link} exists and is not a symlink - remove it manually first"
-        return 1
-    fi
-    ln -sfn "${py}" "${link}"
-    print_success "Linked: ${link}"
+    rm -f "${link}"
+    cp -f "${py}" "${link}"
+    print_success "Installed: ${link}"
 
     # 3. Verify Handy + model
     print_step 3 "Verifying Handy CLI + Parakeet model"
@@ -1942,10 +1939,10 @@ cmd_captions_status() {
     local captions_dir; captions_dir="$(_captions_dir)"
 
     print_header "Handy Captions status"
-    if [[ -L "${link}" ]]; then
-        print_success "Resolve script linked: ${link}"
+    if [[ -f "${link}" || -L "${link}" ]]; then
+        print_success "Resolve script installed: ${link}"
     else
-        print_warning "Resolve script not linked - run '${SCRIPT_NAME} captions install'"
+        print_warning "Resolve script missing - run '${SCRIPT_NAME} captions install'"
     fi
     if [[ -d "${captions_dir}/node_modules" ]]; then
         print_success "node_modules present"
@@ -1963,11 +1960,11 @@ cmd_captions_status() {
 cmd_captions_uninstall() {
     local link; link="$(_captions_link_target)"
     print_header "Uninstalling Handy Captions"
-    if [[ -L "${link}" ]]; then
-        rm "${link}"
+    if [[ -e "${link}" || -L "${link}" ]]; then
+        rm -f "${link}"
         print_success "Removed ${link}"
     else
-        print_info "No symlink found - nothing to remove"
+        print_info "No script found - nothing to remove"
     fi
     print_info "Keep node_modules? Remove ${DOTFILES_DIR}/home/.config/davinci-captions/node_modules manually if unwanted"
 }
@@ -1979,9 +1976,9 @@ cmd_captions_help() {
     echo "    ${SCRIPT_NAME} captions [SUBCOMMAND]"
     echo ""
     echo -e "${BOLD}SUBCOMMANDS:${RESET}"
-    echo "    install      Install deps + link script into Resolve + verify Handy"
-    echo "    status       Show link/deps/Handy state"
-    echo "    uninstall    Remove the Resolve script link"
+    echo "    install      Install deps + copy script into Resolve + verify Handy"
+    echo "    status       Show installed file/deps/Handy state"
+    echo "    uninstall    Remove the Resolve script copy"
     echo "    help         Show this help message"
     echo ""
     echo -e "${BOLD}NOTES:${RESET}"

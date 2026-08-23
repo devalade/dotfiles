@@ -20,7 +20,8 @@ dot captions install
 
 This:
 1. Installs the npm deps (`mediabunny`, `@mediabunny/server`) into this folder
-2. Symlinks `captions-handy.py` into Resolve's `Workflow Integrations` scripts folder
+2. Copies `captions-handy.py` into Resolve's `Workflow Integrations` scripts folder
+   (a real copy — Resolve's script menu does not reliably show symlinks on macOS)
 3. Verifies Handy is installed and the Parakeet model is downloaded
 
 Then restart Resolve (it scans script folders at launch) and run the script.
@@ -40,7 +41,7 @@ CLI returns text without per-segment timestamps.
 
 | Symptom | Fix |
 |---|---|
-| Script missing from the menu | Restart Resolve after `dot captions install`; check the symlink in `~/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Workflow Integrations/` |
+| Script missing from the menu | Restart Resolve after `dot captions install`; check the file in `~/Library/Application Support/Blackmagic Design/DaVinci Resolve/Fusion/Scripts/Workflow Integrations/` |
 | `node/bun not found` | Install Node or Bun, or set `DAVINCI_CAPTIONS_NODE=/path/to/node` in your shell before launching Resolve |
 | Empty captions | The timeline audio has no speech detected (threshold: −38 dBFS, 0.15 s) |
 | Text+ titles instead of subtitle track | The SRT auto-import probe is version-dependent; drag the saved `.srt` onto a subtitle track manually, or edit the Text+ clips in the Inspector |
