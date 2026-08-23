@@ -48,3 +48,11 @@ copy_mode = "prefix+["
 
 [experimental]
 pane_history = false
+
+# Theme: follow host terminal light/dark appearance (matches Ghostty:
+# light = TokyoNight Day, dark = Catppuccin Macchiato)
+[theme]
+name = "catppuccin"
+auto_switch = true
+light_name = "tokyo-night-day"
+dark_name = "catppuccin"
