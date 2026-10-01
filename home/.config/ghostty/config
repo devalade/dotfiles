@@ -1,5 +1,5 @@
 # Ghostty theme (follows macOS light/dark appearance)
-theme = light:TokyoNight Day,dark:Catppuccin Macchiato
+theme = Kanagawa Lotus
 
 # Updates
 auto-update-channel = tip

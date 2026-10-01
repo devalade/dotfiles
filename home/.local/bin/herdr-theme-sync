@@ -1,0 +1,83 @@
+#!/opt/homebrew/bin/python3
+"""Sync Ghostty's theme to the theme selected in herdr's config.toml."""
+import json, os, re, subprocess, tomllib
+
+HERDR = os.path.expanduser("~/.config/herdr/config.toml")
+GHOSTTY = os.path.expanduser("~/.config/ghostty/config")
+HARNESS_SETTINGS = [
+    os.path.expanduser("~/.claude/settings.json"),  # Claude Code
+    os.path.expanduser("~/.pi/agent/settings.json"),  # pi
+]
+
+LIGHT = {"catppuccin-latte", "tokyo-night-day", "gruvbox-light", "one-light",
+         "solarized-light", "kanagawa-lotus", "rose-pine-dawn"}
+
+# herdr theme name -> Ghostty theme name
+MAP = {
+    "catppuccin": "Catppuccin Macchiato",
+    "catppuccin-latte": "Catppuccin Latte",
+    "tokyo-night": "TokyoNight",
+    "tokyo-night-day": "TokyoNight Day",
+    "dracula": "Dracula",
+    "nord": "Nord",
+    "gruvbox": "Gruvbox Dark",
+    "gruvbox-light": "Gruvbox Light",
+    "one-dark": "Atom One Dark",
+    "one-light": "Atom One Light",
+    "solarized": "iTerm2 Solarized Dark",
+    "solarized-light": "iTerm2 Solarized Light",
+    "kanagawa": "Kanagawa Wave",
+    "kanagawa-lotus": "Kanagawa Lotus",
+    "rose-pine": "Rose Pine",
+    "rose-pine-dawn": "Rose Pine Dawn",
+    "vesper": "Vesper",
+}
+
+def ghostty_name(name):
+    return MAP.get(name, name.replace("-", " ").title())
+
+with open(HERDR, "rb") as f:
+    t = tomllib.load(f).get("theme", {})
+
+def sync_json_theme(path):
+    """Set top-level "theme" to light/dark in an agent harness's settings.json."""
+    if t.get("auto_switch"):
+        return  # herdr follows macOS appearance; so do the harnesses' own auto modes
+    want = "light" if t.get("name") in LIGHT else "dark"
+    try:
+        with open(path) as f:
+            cfg = json.load(f)
+    except (OSError, ValueError):
+        return
+    if cfg.get("theme") != want:
+        cfg["theme"] = want
+        with open(path, "w") as f:
+            json.dump(cfg, f, indent=2)
+            f.write("\n")
+
+# Agent harnesses with a light/dark theme setting. opencode uses theme "system",
+# which already follows the terminal palette, so it needs no sync.
+for harness_settings in HARNESS_SETTINGS:
+    sync_json_theme(harness_settings)
+
+if not t.get("auto_switch") and t.get("name") == "terminal":
+    raise SystemExit(0)
+
+if t.get("auto_switch"):
+    value = "light:{},dark:{}".format(
+        ghostty_name(t.get("light_name", t.get("name", "catppuccin"))),
+        ghostty_name(t.get("dark_name", t.get("name", "catppuccin"))),
+    )
+else:
+    value = ghostty_name(t.get("name", "catppuccin"))
+
+with open(GHOSTTY) as f:
+    text = f.read()
+new = re.sub(r"(?m)^theme\s*=.*$", f"theme = {value}", text, count=1)
+if new == text:
+    raise SystemExit(0)
+
+with open(GHOSTTY, "w") as f:  # writes through the dotfiles symlink
+    f.write(new)
+# SIGUSR2 makes Ghostty reload its config
+subprocess.run(["pkill", "-USR2", "-x", "ghostty"])

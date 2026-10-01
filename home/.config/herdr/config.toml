@@ -52,7 +52,7 @@ pane_history = false
 # Theme: follow host terminal light/dark appearance (matches Ghostty:
 # light = TokyoNight Day, dark = Catppuccin Macchiato)
 [theme]
-name = "catppuccin"
-auto_switch = true
+name = "kanagawa-lotus"
+auto_switch = false
 light_name = "tokyo-night-day"
 dark_name = "catppuccin"
