@@ -1,0 +1,668 @@
+<!doctype html>
+<html lang="fr"><head><meta charset="utf-8"><title>22:47</title>
+<style>
+@font-face{font-family:Plex;font-weight:400;font-style:normal;src:url(fonts/plex-serif-400-normal.woff2)}
+@font-face{font-family:Plex;font-weight:500;font-style:normal;src:url(fonts/plex-serif-500-normal.woff2)}
+@font-face{font-family:Plex;font-weight:300;font-style:italic;src:url(fonts/plex-serif-300-italic.woff2)}
+@font-face{font-family:Plex;font-weight:400;font-style:italic;src:url(fonts/plex-serif-400-italic.woff2)}
+@font-face{font-family:Q;font-weight:400;src:url(fonts/ia-writer-quattro-latin-400-normal.woff2)}
+@font-face{font-family:Q;font-weight:700;src:url(fonts/ia-writer-quattro-latin-700-normal.woff2)}
+:root{--paper:#f6f2ea;--paper2:#ede7da;--ink:#15160f;--ink2:#57554b;--ink3:#8a877b;--rule:#e2dbcc;--green:#1f7a3a;--green2:#17602d;--gsoft:#e3efdf;--night:#121a12;--nrule:#2c3a2b;--nink:#f4f0e7;--nink2:#aab3a3;--chat:#efeae2;--out:#d9fdd3;--surface:#fffdf9}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{width:1080px;height:1920px;overflow:hidden;background:var(--night)}
+body{position:relative;font-family:Q,system-ui,sans-serif;-webkit-font-smoothing:antialiased;font-variant-numeric:tabular-nums;color:var(--ink)}
+.abs{position:absolute}
+#bg,#reveal{position:absolute;inset:0}
+#reveal{background:var(--paper)}
+#world,#mlayer,#frame{position:absolute;left:0;top:0;width:1080px;height:1920px;transform-origin:0 0}
+#grain{position:absolute;left:0;top:0;width:1080px;height:1920px;pointer-events:none}
+
+/* iPhone 16 Pro, natural titanium */
+#phone{position:absolute;left:180px;top:140px;width:720px;height:1500px;transform-origin:360px 750px}
+#ti{position:absolute;inset:0;border-radius:118px;background:linear-gradient(150deg,#d4d1ca 0%,#8e8a83 28%,#cfccc5 52%,#7b776f 78%,#b9b5ad 100%)}
+#bez{position:absolute;inset:7px;border-radius:111px;background:#0b0b0c}
+#scr{position:absolute;left:20px;top:20px;width:680px;height:1460px;border-radius:96px;overflow:hidden;background:#0c120c}
+.key{position:absolute;width:7px;border-radius:3px;background:#8e8a83}
+.island{position:absolute;left:240px;top:22px;width:200px;height:58px;border-radius:29px;background:#000;z-index:9}
+.scrn{position:absolute;inset:0}
+
+/* lock screen */
+#lock{background:#0e150e;color:var(--nink)}
+#ldate{position:absolute;left:0;width:680px;top:150px;text-align:center;font-size:34px;color:var(--nink2)}
+#lclock{position:absolute;left:0;width:680px;top:192px;height:210px;overflow:hidden}
+#lclock div{position:absolute;left:0;width:680px;text-align:center;font-size:196px;font-weight:700;line-height:210px;letter-spacing:-.02em}
+.nt{position:absolute;left:26px;width:628px;height:176px;border-radius:36px;background:#1d251d;border:1px solid var(--nrule)}
+.nt .av{position:absolute;left:24px;top:26px;width:76px;height:76px;border-radius:38px;background:#334033;color:var(--nink);font-size:34px;font-weight:700;line-height:76px;text-align:center}
+.nt .nm{position:absolute;left:120px;top:22px;font-size:32px;font-weight:700;line-height:38px;display:flex;align-items:center;gap:14px}
+.nt .tm{position:absolute;right:26px;top:26px;font-size:26px;color:var(--nink2);line-height:36px}
+.nt .ms{position:absolute;left:120px;top:64px;width:484px;font-size:32px;line-height:40px;color:#dfe3da}
+.rep{display:inline-flex;align-items:center;gap:6px;height:34px;padding:0 12px 0 10px;border-radius:17px;background:var(--green);color:#fff;font-size:22px;font-weight:700}
+
+/* chats */
+.sbar{position:absolute;left:0;top:0;width:680px;height:80px;font-size:28px;font-weight:700}
+.sbar .st{position:absolute;left:66px;top:28px}
+.hdr{position:absolute;left:0;top:80px;width:680px;height:120px;display:flex;align-items:center;gap:16px;padding:0 24px}
+.hdr .av{width:72px;height:72px;border-radius:36px;font-size:32px;font-weight:700;line-height:72px;text-align:center;flex:none}
+.hdr .nm{font-size:34px;font-weight:700;line-height:40px}
+.hdr .ss{font-size:24px;line-height:30px}
+.area{position:absolute;left:0;top:200px;width:680px;height:1130px;overflow:hidden}
+.th{position:absolute;left:0;top:0;width:680px}
+.bub{position:absolute;max-width:580px;border-radius:30px;padding:20px 26px 18px;font-size:37px;line-height:50px;overflow:hidden}
+.day{position:absolute;height:50px;padding:0 20px;border-radius:14px;font-size:24px;line-height:50px}
+#nchat .day{background:#1d251d;color:var(--nink2)}
+#lchat .day{background:#fffdf9;color:#7b7a70;border:1px solid #e6e1d8}
+#nchat .bub.out{background:#26382a;color:var(--nink)}
+.bub.in{left:22px;border-top-left-radius:8px}
+.bub.out{right:22px;border-top-right-radius:8px}
+.bub .tx{position:relative}
+.meta{float:right;display:inline-flex;align-items:center;gap:6px;margin:16px 0 -10px 18px;font-size:23px;line-height:30px}
+.dots{position:absolute;left:0;top:0;width:132px;height:84px}
+.dots i{position:absolute;top:36px;width:14px;height:14px;border-radius:7px}
+.comp{position:absolute;left:0;top:1330px;width:680px;height:130px}
+.lbl{position:absolute;right:30px;display:flex;align-items:center;gap:10px;font-size:23px;color:var(--ink3)}
+
+#nchat{background:#0b120c;color:var(--nink)}
+#nchat .hdr,#nchat .sbar{background:#141c14}
+#nchat .hdr{border-bottom:1px solid var(--nrule)}
+#nchat .hdr .av{background:#334033;color:var(--nink)}
+#nchat .ss{color:var(--nink2)}
+#nchat .bub.in{background:#1f2a20;color:var(--nink)}
+#nchat .meta{color:var(--nink2)}
+#nchat .comp{background:#141c14;border-top:1px solid var(--nrule)}
+
+#lchat{background:var(--chat);color:var(--ink)}
+#lchat .hdr,#lchat .sbar{background:#f6f5f3}
+#lchat .hdr{border-bottom:1px solid #e3e0da}
+#lchat .hdr .av{background:#dfe5e7;color:#54656f}
+#lchat .ss{color:#7b7a70}
+#lchat .bub.in{background:#fff;border:1px solid #e6e1d8}
+#lchat .bub.out{background:var(--out);border:1px solid #c6ecbf}
+#lchat .meta{color:#7b7a70}
+#lchat .comp{background:#f6f5f3;border-top:1px solid #e3e0da}
+.field{position:absolute;left:84px;top:22px;width:440px;height:66px;border-radius:33px;background:#fff;border:1px solid #e3e0da}
+#nchat .field{background:#1d251d;border-color:var(--nrule)}
+.homebar{position:absolute;left:250px;top:110px;width:180px;height:8px;border-radius:4px}
+.chip{position:absolute;display:inline-flex;align-items:center;gap:10px;border:1px solid #b9dcc0;border-radius:999px;background:var(--gsoft);color:var(--green2);font-weight:700}
+
+/* banner and answer sheet */
+#ban{position:absolute;left:18px;top:70px;width:644px;border-radius:40px;background:#fbfaf7;border:1px solid #ddd8ce;overflow:hidden;z-index:8}
+
+/* floating pieces on paper */
+.card{position:absolute;background:var(--surface);border:1px solid var(--rule);border-radius:32px;overflow:hidden}
+.cap{position:absolute;left:0;width:1080px;text-align:center;font-family:Plex;font-weight:400;letter-spacing:-.025em;color:var(--ink)}
+.cap .ln{white-space:nowrap;display:table;margin:0 auto}
+.cap .w{display:inline-block;white-space:pre}
+.cap .ac{font-style:italic;font-weight:300;color:var(--green)}
+.night .w{color:var(--nink)}
+.night .ac{color:#7fc493}
+#logo{position:absolute;left:0;top:0;overflow:hidden}
+#logo img{position:absolute;inset:0;width:100%;height:100%}
+.inp{position:absolute;left:48px;width:764px;height:104px;border-radius:16px;background:#fff;border:1px solid var(--rule);font-size:38px;line-height:104px;padding:0 30px}
+.flab{position:absolute;left:48px;font-size:30px;color:var(--ink2)}
+.ic{fill:none;stroke:currentColor;stroke-linecap:round;stroke-linejoin:round}
+</style></head>
+<body>
+<div id="bg"></div>
+<div id="reveal"></div>
+
+<div id="world">
+  <div id="phone">
+    <div id="ti"></div>
+    <span class="key" style="left:-4px;top:250px;height:56px"></span>
+    <span class="key" style="left:-4px;top:340px;height:100px"></span>
+    <span class="key" style="left:-4px;top:460px;height:100px"></span>
+    <span class="key" style="right:-4px;top:400px;height:160px"></span>
+    <div id="bez"></div>
+    <div id="scr">
+      <div class="island"></div>
+
+      <div class="scrn" id="lock">
+        <div id="ldate"></div>
+        <div id="lclock"><div id="lc0"></div><div id="lc1"></div></div>
+        <div id="lstack"></div>
+        <div class="homebar" style="top:1430px;background:#f4f0e7;opacity:.7"></div>
+      </div>
+
+      <div class="scrn" id="nchat">
+        <div class="sbar"><span class="st" id="nst">23:31</span></div>
+        <div class="hdr"><svg class="ic" width="34" height="34" viewBox="0 0 24 24" style="color:#7fc493;stroke-width:2.4"><path d="M15 18l-6-6 6-6"/></svg><div class="av">K</div><div><div class="nm">Kemi</div><div class="ss">client</div></div></div>
+        <div class="area"><div class="th" id="nth">
+          <div class="day" id="nd0">Hier</div>
+          <div class="bub in" id="nh0"><div class="tx">Merci, le poulet yassa était parfait !<span class="meta">19:02</span></div></div>
+          <div class="bub out" id="nh1"><div class="tx">Merci Kemi ! À bientôt.<span class="meta">19:10</span></div></div>
+          <div class="day" id="nd1">Aujourd'hui</div>
+          <div class="bub in" id="n0"><div class="tx">C'est combien la livraison à Yopougon ?<span class="meta">22:47</span></div></div>
+          <div class="bub in" id="n1"><div class="tx">Bon, je vais demander ailleurs.<span class="meta">23:31</span></div></div>
+          <div class="bub out" id="n2" style="background:var(--green);width:132px;height:84px;padding:0"><div class="dots"><i style="left:34px;background:#fff"></i><i style="left:59px;background:#fff"></i><i style="left:84px;background:#fff"></i></div></div>
+        </div></div>
+        <div class="comp"><div class="field"></div><div class="homebar" style="background:#f4f0e7;opacity:.7"></div></div>
+      </div>
+
+      <div class="scrn" id="lchat">
+        <div class="sbar"><span class="st">22:47</span></div>
+        <div class="hdr"><svg class="ic" width="34" height="34" viewBox="0 0 24 24" style="color:#007aff;stroke-width:2.4"><path d="M15 18l-6-6 6-6"/></svg><div class="av">K</div><div><div class="nm">Kemi</div><div class="ss">en ligne</div></div></div>
+        <div class="area"><div class="th" id="lth">
+          <div class="day" id="ld0">Hier</div>
+          <div class="bub in" id="lh0"><div class="tx">Merci, le poulet yassa était parfait !<span class="meta">19:02</span></div></div>
+          <div class="bub out" id="lh1"><div class="tx">Merci Kemi ! À bientôt.<span class="meta">19:10</span></div></div>
+          <div class="day" id="ld1">Aujourd'hui</div>
+          <div class="bub in" id="m0"><div class="tx">C'est combien la livraison à Yopougon ?<span class="meta">22:47</span></div></div>
+          <div class="bub out" id="m1"><div class="tx">Bonsoir Kemi ! Oui, on livre à Yopougon ce soir pour <span id="price">1 500 FCFA</span>. Je prends votre commande ?<span class="meta">22:47 <svg width="30" height="20" viewBox="0 0 30 20" class="ic" style="color:#53bdeb;stroke-width:2.6"><path d="M2 10l5 5L17 4M13 15l2 0L26 4"/></svg></span></div><div class="dots"><i style="left:34px;background:#8fa88a"></i><i style="left:59px;background:#8fa88a"></i><i style="left:84px;background:#8fa88a"></i></div></div>
+          <div class="lbl" id="m1l"><img src="../../apps/web/public/logo.svg" width="30" height="30">Répondu par ZeAssistant</div>
+          <div class="bub in" id="m2"><div class="tx">Parfait, je commande !<span class="meta">22:48</span></div></div>
+          <div class="bub in" id="m3"><div class="tx">Et samedi, vous pouvez faire un plateau pour 40 personnes ?<span class="meta">22:51</span></div></div>
+          <div class="bub out" id="m4"><div class="tx">Bonne question. Je vérifie avec Aïcha et je reviens vers vous très vite.<span class="meta">22:51 <svg width="30" height="20" viewBox="0 0 30 20" class="ic" style="color:#53bdeb;stroke-width:2.6"><path d="M2 10l5 5L17 4M13 15l2 0L26 4"/></svg></span></div><div class="dots"><i style="left:34px;background:#8fa88a"></i><i style="left:59px;background:#8fa88a"></i><i style="left:84px;background:#8fa88a"></i></div></div>
+          <div class="bub out" id="m5"><div class="tx">Oui, 30 000 FCFA le plateau. À commander avant jeudi.<span class="meta">22:53 <svg width="30" height="20" viewBox="0 0 30 20" class="ic" style="color:#53bdeb;stroke-width:2.6"><path d="M2 10l5 5L17 4M13 15l2 0L26 4"/></svg></span></div></div>
+          <div class="chip" id="m6" style="height:62px;padding:0 24px 0 18px;font-size:25px"><svg width="30" height="30" viewBox="0 0 24 24" class="ic" style="stroke-width:2.6"><path id="m6c" d="M5 12.5l4.5 4.5L19 7" pathLength="1" stroke-dasharray="1"/></svg>Retenu. La prochaine fois, il répondra seul.</div>
+        </div></div>
+        <div class="comp"><svg class="ic abs" width="40" height="40" viewBox="0 0 24 24" style="left:26px;top:35px;color:#007aff;stroke-width:2"><path d="M12 5v14M5 12h14"/></svg><div class="field"></div><svg class="ic abs" width="40" height="40" viewBox="0 0 24 24" style="left:560px;top:35px;color:#007aff;stroke-width:2"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg><div class="homebar" style="background:#000"></div></div>
+
+        <div id="ban">
+          <div class="abs" id="banA" style="left:0;top:0;width:644px;height:200px">
+            <img class="abs" src="../../apps/web/public/logo.svg" width="46" height="46" style="left:30px;top:28px">
+            <div class="abs" style="left:92px;top:32px;font-size:26px;font-weight:700;color:#333">ZeAssistant</div>
+            <div class="abs" style="right:30px;top:32px;font-size:24px;color:#8a877b">maintenant</div>
+            <div class="abs" style="left:30px;top:92px;font-size:32px;font-weight:700">Kemi a besoin de vous</div>
+            <div class="abs" style="left:30px;top:138px;font-size:29px;color:#57554b">Un plateau pour 40 personnes samedi ?</div>
+          </div>
+          <div class="abs" id="banB" style="left:0;top:200px;width:644px;height:420px;border-top:1px solid #e9e4da">
+            <div class="abs" style="left:30px;top:30px;font-size:24px;color:#8a877b">Votre réponse</div>
+            <div class="abs" style="left:30px;top:74px;width:584px;height:170px;border-radius:20px;border:1px solid #ddd8ce;background:#fff;padding:20px 24px;font-size:32px;line-height:44px"><span id="atx"></span><span id="acar" style="display:inline-block;width:3px;height:38px;margin-left:2px;vertical-align:-7px;background:var(--green)"></span></div>
+            <div class="abs" id="asend" style="right:30px;top:278px;height:92px;padding:0 36px;border-radius:16px;background:var(--green);color:#fff;font-size:32px;font-weight:700;line-height:92px">Envoyer</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- platform card: number, then voice note -->
+  <div class="card" id="pc">
+    <div class="abs" id="pcA" style="left:0;top:0;width:820px;height:300px">
+      <div class="abs" style="left:40px;top:44px;width:120px;height:120px;border-radius:28px;background:var(--gsoft);color:var(--green)"><svg class="ic" width="120" height="120" viewBox="-6 -6 36 36" style="stroke-width:1.8"><rect x="6" y="2" width="12" height="20" rx="2.5"/><path d="M11 18h2"/></svg></div>
+      <div class="abs" style="left:196px;top:48px;font-size:30px;color:var(--ink3)">WhatsApp Business</div>
+      <div class="abs" style="left:196px;top:94px;font-size:46px;font-weight:700;letter-spacing:-.01em">+225 07 •• •• 42 18</div>
+      <div class="chip" id="pchip" style="left:196px;top:186px;height:62px;padding:0 24px 0 18px;font-size:28px"><svg width="30" height="30" viewBox="0 0 24 24" class="ic" style="stroke-width:2.6"><path id="pchk" d="M5 12.5l4.5 4.5L19 7" pathLength="1" stroke-dasharray="1"/></svg>Connecté</div>
+    </div>
+    <div class="abs" id="pcB" style="left:0;top:0;width:820px;height:460px">
+      <div class="abs" style="left:40px;top:44px;width:116px;height:116px;border-radius:58px;background:var(--ink)"><svg width="116" height="116" viewBox="0 0 24 24"><path id="ppl" fill="#fff"/></svg></div>
+      <div class="abs" id="wave" style="left:190px;top:56px;width:590px;height:92px"></div>
+      <div class="abs" style="right:40px;top:150px;font-size:26px;color:var(--ink3)" id="pdur">0:06</div>
+      <div class="abs" style="left:40px;top:208px;width:740px;height:1px;background:var(--rule)"></div>
+      <div class="abs" id="ptr" style="left:40px;top:236px;width:740px;font-size:40px;line-height:56px"></div>
+    </div>
+  </div>
+</div>
+
+<div id="mlayer">
+  <div id="menu" class="abs" style="left:150px;top:250px;width:780px;transform-origin:390px 560px">
+    <div class="card" style="position:relative;width:780px;padding:56px 60px 60px">
+      <div style="font-family:Plex;font-size:66px;letter-spacing:-.025em;line-height:76px">Menu du jour</div>
+      <div style="font-size:30px;color:var(--ink3);margin-top:10px">Chez Aïcha, Yopougon</div>
+      <div id="mrows" style="margin-top:44px"></div>
+    </div>
+    <div class="chip abs" id="mfile" style="left:0;height:70px;padding:0 26px 0 22px;font-size:30px;background:var(--surface);border-color:var(--rule);color:var(--ink)"><svg width="34" height="34" viewBox="0 0 24 24" class="ic" style="stroke-width:2;color:var(--ink3)"><rect x="3" y="4" width="18" height="16" rx="3"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-9 9"/></svg>menu-du-jour.jpg<span class="chip" id="mdone" style="position:relative;height:44px;padding:0 16px 0 12px;font-size:24px;margin-left:8px"><svg width="24" height="24" viewBox="0 0 24 24" class="ic" style="stroke-width:2.8"><path id="mchk" d="M5 12.5l4.5 4.5L19 7" pathLength="1" stroke-dasharray="1"/></svg>Lu et ajouté</span></div>
+  </div>
+</div>
+
+<div id="frame">
+  <div id="logo"><div class="abs" id="lgfill" style="inset:0;background:var(--green)"></div>
+    <div class="dots" id="lgdots"><i style="left:34px;background:#fff"></i><i style="left:59px;background:#fff"></i><i style="left:84px;background:#fff"></i></div>
+    <img id="lgimg" src="../../apps/web/public/logo.svg"></div>
+
+  <div class="card" id="form" style="left:110px;top:880px;width:860px;height:650px">
+    <div class="flab" style="top:44px">Votre nom</div>
+    <div class="inp" style="top:90px">Aïcha Diallo</div>
+    <div class="flab" style="top:226px">Votre email</div>
+    <div class="inp" style="top:272px"><span id="ftx"></span><span id="fcar" style="display:inline-block;width:3px;height:44px;margin-left:2px;vertical-align:-9px;background:var(--green)"></span></div>
+    <div class="abs" id="fbtn" style="left:48px;top:414px;width:764px;height:108px;border-radius:16px;background:var(--green);color:#fff;font-size:38px;font-weight:700;line-height:108px;text-align:center"><span id="fbl">Réserver ma place</span><span id="fok" class="abs" style="left:0;top:0;width:764px;display:flex;align-items:center;justify-content:center;gap:16px;color:var(--green2)"><svg width="44" height="44" viewBox="0 0 24 24" class="ic" style="stroke-width:2.6"><path id="fchk" d="M5 12.5l4.5 4.5L19 7" pathLength="1" stroke-dasharray="1"/></svg>C'est noté, vous êtes sur la liste</span></div>
+    <div class="abs" style="left:0;width:860px;top:566px;text-align:center;font-size:28px;color:var(--ink3)">Gratuit et sans engagement.</div>
+  </div>
+
+  <div id="endl" class="abs" style="left:0;top:1620px;width:1080px;height:120px">
+    <div class="abs" id="endrow" style="left:0;top:0;width:1080px;display:flex;align-items:center;justify-content:center;gap:24px">
+      <img src="../../apps/web/public/logo.svg" width="96" height="96">
+      <div><div style="font-family:Plex;font-weight:500;font-size:56px;letter-spacing:-.025em;line-height:60px">ZeAssistant</div><div style="font-size:32px;color:var(--ink2);line-height:42px">zeassistant.com</div></div>
+    </div>
+  </div>
+
+  <div id="caps"></div>
+</div>
+<canvas id="grain" width="360" height="640"></canvas>
+
+<script>
+// French is the source; ?lang=en swaps every visible string, timing stays the same
+const LANG = new URLSearchParams(location.search).get('lang') === 'en' ? 'en' : 'fr';
+document.documentElement.lang = LANG;
+const EN = {
+"Ils écrivent à toute heure.": "They write at all hours.",
+"22:47. Personne ne répond.": "22:47. Nobody answers.",
+"Kemi n'a pas attendu.": "Kemi didn't wait.",
+"Revenons à 22:47.": "Back to 22:47.",
+"Vos clients écrivent.": "Your customers write.",
+"ZeAssistant répond.": "ZeAssistant replies.",
+"Avec vos prix et vos mots.": "With your prices and your words.",
+"Une photo de votre menu.": "A photo of your menu.",
+"Il la lit pour vous.": "It reads it for you.",
+"Quand il ne sait pas,": "When it doesn't know,",
+"il vous demande.": "it asks you.",
+"Vous répondez une fois.": "You answer once.",
+"Il s'en souvient.": "It remembers.",
+"Votre numéro reste le vôtre.": "You keep your number.",
+"Il comprend les notes vocales.": "It understands voice notes.",
+"Même à 22:47.": "Even at 22:47.",
+"Même le dimanche.": "Even on Sundays.",
+"La nouvelle version arrive.": "The new version is coming.",
+"Testez-la": "Try it",
+"avant tout le monde.": "before everyone else.",
+"C'est combien la livraison à Yopougon ?": "How much is delivery to Yopougon?",
+"Vous acceptez Wave ?": "Do you take Wave?",
+"Le menu du midi, c'est quoi aujourd'hui ?": "What's on the lunch menu today?",
+"Je peux réserver pour 6 ce soir ?": "Can I book a table for 6 tonight?",
+"Vous êtes ouverts ce matin ?": "Are you open this morning?",
+"mardi 13 octobre": "Tuesday, October 13",
+"mercredi 14 octobre": "Wednesday, October 14",
+"jeudi 15 octobre": "Thursday, October 15",
+"samedi 17 octobre": "Saturday, October 17",
+"dimanche 18 octobre": "Sunday, October 18",
+"Répondu": "Answered",
+"client": "customer",
+"en ligne": "online",
+"Hier": "Yesterday",
+"Aujourd'hui": "Today",
+"Merci, le poulet yassa était parfait !": "Thanks, the chicken yassa was perfect!",
+"Merci Kemi ! À bientôt.": "Thank you Kemi! See you soon.",
+"Bon, je vais demander ailleurs.": "Okay, I'll ask somewhere else.",
+"Bonsoir Kemi ! Oui, on livre à Yopougon ce soir pour": "Good evening Kemi! Yes, we deliver to Yopougon tonight for",
+"1 500 FCFA": "1,500 FCFA",
+". Je prends votre commande ?": ". Shall I take your order?",
+"Répondu par ZeAssistant": "Answered by ZeAssistant",
+"Parfait, je commande !": "Perfect, I'll order!",
+"Et samedi, vous pouvez faire un plateau pour 40 personnes ?": "And on Saturday, could you do a platter for 40 people?",
+"Bonne question. Je vérifie avec Aïcha et je reviens vers vous très vite.": "Good question. Let me check with Aïcha and I'll get right back to you.",
+"Oui, 30 000 FCFA le plateau. À commander avant jeudi.": "Yes, 30,000 FCFA per platter. Order by Thursday.",
+"Retenu. La prochaine fois, il répondra seul.": "Saved. Next time, it will answer on its own.",
+"maintenant": "now",
+"Kemi a besoin de vous": "Kemi needs you",
+"Un plateau pour 40 personnes samedi ?": "A platter for 40 people on Saturday?",
+"Votre réponse": "Your answer",
+"Envoyer": "Send",
+"Connecté": "Connected",
+"« Deux attiéké poisson et un bissap, s'il vous plaît. »": "“Two attiéké with fish and one bissap, please.”",
+"Menu du jour": "Today's menu",
+"Chez Aïcha, Yopougon": "Aïcha's, Yopougon",
+"Attiéké poisson": "Attiéké with fish",
+"Poulet yassa": "Chicken yassa",
+"Livraison Yopougon": "Delivery to Yopougon",
+"2 500 FCFA": "2,500 FCFA",
+"3 500 FCFA": "3,500 FCFA",
+"1 000 FCFA": "1,000 FCFA",
+"menu-du-jour.jpg": "todays-menu.jpg",
+"Lu et ajouté": "Read and added",
+"Votre nom": "Your name",
+"Votre email": "Your email",
+"Réserver ma place": "Save my spot",
+"C'est noté, vous êtes sur la liste": "Done, you're on the list",
+"Gratuit et sans engagement.": "Free, no commitment.",
+"aicha@moncommerce.com": "aicha@yourshop.com"
+};
+const T = s => LANG === 'en' ? (EN[s] ?? s) : s;
+if (LANG === 'en') {
+  const w = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
+  for (let n; (n = w.nextNode());) { const k = n.nodeValue.trim(); if (k && EN[k]) n.nodeValue = n.nodeValue.replace(k, EN[k]) }
+}
+const DUR = 48, FPS = 30;
+const clamp = (x, a = 0, b = 1) => Math.min(b, Math.max(a, x));
+const lerp = (a, b, u) => a + (b - a) * u;
+const sm = x => { x = clamp(x); return x * x * (3 - 2 * x) };
+const eo = x => 1 - Math.pow(1 - clamp(x), 3);              // power3.out
+const ex = x => { x = clamp(x); return x >= 1 ? 1 : 1 - Math.pow(2, -10 * x) }; // expo.out
+const io = x => { x = clamp(x); return x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2 }; // power3.inOut
+const ei = x => clamp(x) ** 2;                               // power2.in
+const seg = (t, a, d, e = eo) => e((t - a) / d);
+// critically damped spring step, no overshoot on UI
+const sp = (tau, f = 2.4) => { if (tau <= 0) return 0; const w = 2 * Math.PI * f; return 1 - Math.exp(-w * tau) * (1 + w * tau) };
+const mix = (c1, c2, u) => `rgb(${c1.map((v, i) => Math.round(lerp(v, c2[i], u))).join(',')})`;
+const $ = id => document.getElementById(id);
+const tf = (el, x = 0, y = 0, s = 1, o = 1, extra = '') => { el.style.transform = `translate(${x}px,${y}px) scale(${s})${extra}`; el.style.opacity = o; el.style.visibility = o <= 0.001 ? 'hidden' : 'visible' };
+function keys(t, K) { // [t, ...values], power3.inOut between keys
+  if (t <= K[0][0]) return K[0].slice(1);
+  for (let i = 1; i < K.length; i++) if (t <= K[i][0]) { const a = K[i - 1], b = K[i], u = io((t - a[0]) / (b[0] - a[0])); return a.slice(1).map((v, j) => lerp(v, b[j + 1], u)) }
+  return K[K.length - 1].slice(1);
+}
+function mulberry32(a) { return () => { a |= 0; a = a + 0x6D2B79F5 | 0; let t = Math.imul(a ^ a >>> 15, 1 | a); t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296 } }
+const NIGHT = [18, 26, 18], PAPER = [246, 242, 234];
+
+// ---------- static content ----------
+const NOTES = [
+  { n: 'Kemi', tm: '22:47', q: T("C'est combien la livraison à Yopougon ?"), clock: '22:47', date: T('mardi 13 octobre') },
+  { n: 'Fatou', tm: '06:58', q: T('Vous acceptez Wave ?'), clock: '06:58', date: T('mercredi 14 octobre') },
+  { n: 'Awa', tm: '12:31', q: T("Le menu du midi, c'est quoi aujourd'hui ?"), clock: '12:31', date: T('jeudi 15 octobre') },
+  { n: 'Joseph', tm: '21:40', q: T('Je peux réserver pour 6 ce soir ?'), clock: '21:40', date: T('samedi 17 octobre') },
+  { n: 'Salma', tm: '07:12', q: T('Vous êtes ouverts ce matin ?'), clock: '07:12', date: T('dimanche 18 octobre') },
+];
+const PASS1 = [0.3, 2.4, 3.0, 3.6, 4.2], PASS2 = [36.9, 37.5, 38.1, 38.7, 39.3];
+const stack = $('lstack');
+NOTES.forEach((n, i) => {
+  stack.insertAdjacentHTML('beforeend', `<div class="nt" id="nt${i}"><div class="av">${n.n[0]}</div><div class="nm">${n.n}<span class="rep" id="rp${i}"><svg width="20" height="20" viewBox="0 0 24 24" class="ic" style="stroke-width:3"><path d="M5 12.5l4.5 4.5L19 7"/></svg>${T('Répondu')}</span></div><div class="tm">${n.tm}</div><div class="ms">${n.q}</div></div>`);
+});
+const MENU = [['Attiéké poisson', '2 500 FCFA'], ['Poulet yassa', '3 500 FCFA'], ['Alloco', '1 000 FCFA'], ['Bissap', '500 FCFA'], ['Livraison Yopougon', '1 500 FCFA']].map(r => r.map(T));
+$('mrows').innerHTML = MENU.map((r, i) => `<div class="mrow" id="mr${i}" style="position:relative;display:flex;justify-content:space-between;align-items:baseline;gap:32px;height:92px;border-top:1px solid var(--rule);font-size:40px;line-height:92px;white-space:nowrap"><div class="abs mhl" id="mh${i}" style="left:-20px;top:10px;height:72px;border-radius:14px;background:var(--gsoft);transform-origin:0 0"></div><span style="position:relative">${r[0]}</span><span style="position:relative;font-weight:700" ${i === 4 ? 'id="mprice"' : ''}>${r[1]}</span></div>`).join('');
+const WV = [8, 14, 22, 12, 30, 18, 10, 24, 34, 20, 12, 26, 32, 16, 22, 10, 18, 26, 14, 8, 16, 6, 12, 20, 28, 14, 9, 18, 24, 12, 7, 10];
+$('wave').innerHTML = WV.map((h, i) => `<i id="wv${i}" style="position:absolute;left:${i * 18.4}px;top:${46 - h * 1.2}px;width:8px;height:${h * 2.4}px;border-radius:4px;background:#cfc9bb"></i>`).join('');
+const TRANS = T("« Deux attiéké poisson et un bissap, s'il vous plaît. »").split(' ');
+$('ptr').innerHTML = TRANS.map((w, i) => `<span id="tw${i}">${w} </span>`).join('');
+
+// captions: [t0, t1, y, size, lines, opts]; a line is [text, accent, delay]
+const CAPS = [
+  [0.9, 4.6, 1690, 72, [['Ils écrivent à toute heure.']], { night: 1 }],
+  [6.0, 7.8, 1690, 72, [['22:47. Personne ne répond.']], { night: 1 }],
+  [8.1, 9.5, 1690, 72, [['Kemi n\'a pas attendu.']], { night: 1 }],
+  [9.9, 11.3, 1690, 72, [['Revenons à 22:47.']], { night: 1 }],
+  [12.45, 14.35, 900, 96, [['Vos clients écrivent.'], ['ZeAssistant répond.', 1, .55]]],
+  [16.3, 19.1, 1690, 72, [['Avec vos prix et vos mots.']]],
+  [20.7, 23.6, 1590, 68, [['Une photo de votre menu.'], ['Il la lit pour vous.', 0, 1.2]]],
+  [25.1, 27.9, 1680, 72, [['Quand il ne sait pas,'], ['il vous demande.', 1, .7]]],
+  [28.3, 30.95, 1680, 72, [['Vous répondez une fois.'], ['Il s\'en souvient.', 0, 1.75]]],
+  [31.85, 33.45, 1270, 72, [['Votre numéro reste le vôtre.']]],
+  [34.1, 35.8, 1330, 72, [['Il comprend les notes vocales.']]],
+  [37.1, 40.6, 1690, 72, [['Même à 22:47.'], ['Même le dimanche.', 0, 1.5]], { night: 1 }],
+  [41.35, 99, 420, 56, [['La nouvelle version arrive.']], { move: 1 }],
+  [42.3, 99, 500, 104, [['Testez-la'], ['avant tout le monde.', 1, .35]]],
+];
+const capEls = CAPS.map(([t0, t1, y, size, lines, o = {}]) => {
+  const d = document.createElement('div'); d.className = 'cap' + (o.night ? ' night' : ''); d.style.top = y + 'px'; d.style.fontSize = size + 'px'; d.style.lineHeight = Math.round(size * 1.16) + 'px';
+  const words = [];
+  lines.forEach(([fr, ac, dl = 0]) => { const text = T(fr);
+    const ln = document.createElement('div'); ln.className = 'ln';
+    text.split(' ').forEach((w, k, arr) => { const s = document.createElement('span'); s.className = 'w' + (ac ? ' ac' : ''); s.textContent = w + (k < arr.length - 1 ? ' ' : ''); ln.appendChild(s); words.push([s, t0 + dl + k * 0.075]) });
+    d.appendChild(ln);
+  });
+  $('caps').appendChild(d); return { d, t0, t1, words, move: o.move };
+});
+
+// ---------- layout, measured once after fonts load ----------
+let M = null;
+function measure() {
+  M = {};
+  // a caption line never runs wider than the frame minus the gutters
+  capEls.forEach(c => { const w = Math.max(...[...c.d.children].map(l => l.offsetWidth)); if (w > 1000) { const f = parseFloat(c.d.style.fontSize) * 1000 / w; c.d.style.fontSize = f + 'px'; c.d.style.lineHeight = Math.round(f * 1.16) + 'px' } });
+  const col = (ids, gap, mk) => { let y = 0; return ids.map(id => { const el = $(id); const h = el.offsetHeight; const r = { el, y, h, w: el.offsetWidth }; y += h + gap; if (mk) mk(r); return r }) };
+  // light chat: label m1l sits under m1 and costs its own row
+  M.l = col(LMSG.map(e => e.id), 14);
+  M.n = col(NMSG.map(e => e.id), 14);
+  M.L = Object.fromEntries(M.l.map(r => [r.el.id, r])); M.N = Object.fromEntries(M.n.map(r => [r.el.id, r]));
+  M.l.forEach(r => r.el.style.top = r.y + 'px'); M.n.forEach(r => r.el.style.top = r.y + 'px');
+  for (const id of ['m6', 'nd0', 'nd1', 'ld0', 'ld1']) { const r = M.L[id] || M.N[id]; r.el.style.left = (680 - r.w) / 2 + 'px' }
+  for (const id of ['m1', 'm4']) { const el = $(id), tx = el.querySelector('.tx'); tx.style.width = tx.offsetWidth + 'px' }
+  // measured before any transform is applied, so rects are layout positions
+  const c = el => { const r = el.getBoundingClientRect(); return { x: r.x + r.width / 2, y: r.y + r.height / 2 } };
+  const pr = c($('price')), th = $('lth').getBoundingClientRect(); M.price = { x: pr.x - th.x, y: pr.y - th.y };
+  M.mprice = c($('mprice'));
+  M.menuH = $('menu').querySelector('.card').offsetHeight;
+  $('mfile').style.top = (M.menuH + 34) + 'px';
+  MENU.forEach((r, i) => { $('mh' + i).style.width = ($('mr' + i).offsetWidth + 40) + 'px' });
+}
+
+// message events: a arrival, r removal, m morph from dots (hd) to full
+const HIST = p => [p + 'd0', p + 'h0', p + 'h1', p + 'd1'].map(id => ({ id, a: -9 }));
+const LMSG = [...HIST('l'), { id: 'm0', a: -9 }, { id: 'm1', a: 14.6, m: 15.85, hd: 84 }, { id: 'm1l', a: 15.85 }, { id: 'm2', a: 17.4 }, { id: 'm3', a: 24.6 }, { id: 'm4', a: 25.25, m: 25.8, hd: 84 }, { id: 'm5', a: 29.75 }, { id: 'm6', a: 30.15 }];
+const NMSG = [...HIST('n'), { id: 'n0', a: -9 }, { id: 'n1', a: 7.2, r: 9.65 }, { id: 'n2', a: 10.8 }];
+function threadY(t, rows, ev) {
+  let h = 0;
+  rows.forEach((r, i) => { const e = ev[i]; let full = (r.h + 14) * sp(t - e.a, 2.2); if (e.m) full = (e.hd + 14) * sp(t - e.a, 2.2) + (r.h - e.hd) * sp(t - e.m, 2.2); if (e.r) full *= 1 - sp(t - e.r, 2.6); h += full });
+  return 1130 - 26 - h;
+}
+const PH = { x: 200, y: 160 }; // screen origin in world at rest
+
+// ---------- scene pieces ----------
+function phoneState(t) {
+  let x = 0, y = 0, s = 1, o = 1;
+  if (t < 11.4) { }
+  else if (t < 12.2) { const u = io((t - 11.4) / .7); s = 1 - .06 * u; o = 1 - u }
+  else if (t < 14.4) o = 0;
+  else if (t < 19.8) { y = 1800 * (1 - sp(t - 14.4, 1.3)) }
+  else if (t < 23.7) o = 0;
+  else if (t < 31.2) { x = 1150 * (1 - io((t - 23.7) / .9)) }
+  else if (t < 36.0) { const u = io((t - 31.2) / .8); y = 1900 * u; s = 1 - .04 * u; if (u >= 1) o = 0 }
+  else if (t < 40.8) { y = 1900 * (1 - sp(t - 36.0, 1.3)) }
+  else { const u = io((t - 40.8) / .8); y = 1900 * u; s = 1 - .05 * u; if (u >= 1) o = 0 }
+  if (t >= 19.8 && t < 20.2) o = 1 - sm((t - 19.95) / .2);
+  return { x, y, s, o };
+}
+function phoneMap(t, px, py) { // screen-local point to frame, camera identity assumed
+  const p = phoneState(t); const cx = 540, cy = 890;
+  const wx = PH.x + px, wy = PH.y + py;
+  const c = camMap(t, cx + (wx - cx) * p.s + p.x, cy + (wy - cy) * p.s + p.y);
+  return { x: c.x, y: c.y, s: p.s * c.s };
+}
+function camera(t) {
+  if (t < 12.2) return keys(t, [[0, 1.3, 540, 700], [0.6, 1.3, 540, 700], [4.6, 1.0, 540, 930], [5.5, 1.3, 540, 1440], [6.3, 1.36, 540, 1190], [9.6, 1.44, 540, 1210], [10.6, 1.36, 540, 1190]]);
+  if (t < 14.4) return [1, 540, 960];
+  if (t < 20.2) return keys(t, [[15.3, 1, 540, 960], [16.1, 1.24, 540, 1170], [19.15, 1.28, 540, 1170], [19.95, 2.6, PRICE_W.x, PRICE_W.y]]);
+  if (t < 24) return [1, 540, 960];
+  if (t < 31.2) return keys(t, [[24.6, 1, 540, 960], [26.9, 1.06, 540, 940], [27.2, 1, 540, 960]]);
+  if (t < 36.9) return [1, 540, 960];
+  return keys(t, [[36.9, 1, 540, 960], [40.8, 1.05, 540, 930]]);
+}
+const camMap = (t, x, y) => { const [s, cx, cy] = camera(t); return { x: 540 + (x - cx) * s, y: 960 + (y - cy) * s, s } };
+let PRICE_W = { x: 540, y: 960 };
+
+function drawLock(t) {
+  const pass2 = t > 20, A = pass2 ? PASS2 : PASS1;
+  let k = -1; A.forEach((a, i) => { if (t >= a) k = i });
+  const ci = Math.max(0, k), u = k >= 1 ? eo((t - A[k]) / .32) : 1;
+  $('lc0').textContent = NOTES[ci].clock; $('lc1').textContent = k >= 1 ? NOTES[k - 1].clock : '';
+  tf($('lc0'), 0, 40 * (1 - u), 1, u); tf($('lc1'), 0, -40 * u, 1, k >= 1 ? 1 - u : 0);
+  $('ldate').textContent = NOTES[ci].date;
+  // screen wakes at the first frames
+  $('lock').style.opacity = pass2 ? 1 : sm((t - .05) / .25);
+  NOTES.forEach((n, i) => {
+    const el = $('nt' + i), a = A[i];
+    let y = 460; for (let j = i + 1; j < 5; j++) y += 188 * sp(t - A[j], 2.6);
+    const e = sp(t - a, 2.8), o = clamp((t - a) / .12) * (t >= a ? 1 : 0);
+    let dim = 1;
+    if (!pass2 && i !== 0) dim = 1 - .62 * sm((t - 4.8) / .5);
+    if (!pass2 && i === 0) dim = 1 - sm((t - 5.65) / .2);
+    tf(el, 0, y - 46 * (1 - e), .94 + .06 * e, o * dim);
+    const rp = $('rp' + i); const ru = pass2 ? sp(t - a - .35, 3) : 0;
+    tf(rp, 0, 0, .8 + .2 * ru, ru);
+  });
+}
+function bubbleIn(el, t, a, kind = 'in') {
+  const e = sp(t - a, 2.8), o = clamp((t - a) / .1) * (t >= a ? 1 : 0);
+  el.style.transformOrigin = kind === 'in' ? '0 100%' : '100% 100%';
+  tf(el, 0, 26 * (1 - e), .94 + .06 * e, o);
+}
+function dotsAnim(el, t) { [...el.children].forEach((d, k) => { const ph = Math.sin(2 * Math.PI * (t * 1.7 - k * .18)); d.style.transform = `translateY(${-7 * Math.max(0, ph)}px)`; d.style.opacity = .55 + .45 * Math.max(0, ph) }) }
+function morphBubble(el, t, r, m, show) { // dots bubble grows to its measured size
+  const u = io((t - m) / .5); const tx = el.querySelector('.tx'), dots = el.querySelector('.dots');
+  el.style.width = lerp(132, r.w, u) + 'px'; el.style.height = lerp(84, r.h, u) + 'px';
+  el.style.padding = t < m ? '0' : ''; tx.style.opacity = sm((t - m - .25) / .25); dots.style.opacity = 1 - sm((t - m) / .12); dotsAnim(dots, t);
+  if (t < m) { tx.style.position = 'absolute'; tx.style.left = '26px'; tx.style.top = '20px' } else { tx.style.position = 'absolute'; tx.style.left = '26px'; tx.style.top = '20px' }
+}
+
+function drawNight(t) {
+  const sc = $('nchat');
+  // Kemi's card grows into her chat
+  const u = io((t - 5.6) / .7);
+  if (t < 5.6) { sc.style.display = 'none'; return }
+  const x = lerp(26, 0, u), y = lerp(460 + 4 * 188, 0, u), w = lerp(628, 680, u), h = lerp(176, 1460, u), rr = lerp(36, 96, u);
+  sc.style.clipPath = `inset(${y}px ${680 - x - w}px ${1460 - y - h}px ${x}px round ${rr}px)`;
+  sc.style.background = mix([29, 37, 29], [11, 18, 12], u);
+  const ci = sm((t - 5.95) / .4);
+  [...sc.children].forEach(c => c.style.opacity = ci);
+  $('nth').style.transform = `translateY(${threadY(t, M.n, NMSG)}px)`;
+  $('n0').style.opacity = 1;
+  // n1 arrives, then rewinds out
+  if (t < 9.65) bubbleIn($('n1'), t, 7.2); else { const r = sp(t - 9.65, 2.6); tf($('n1'), 0, 26 * r, 1 - .06 * r, 1 - sm((t - 9.65) / .3)) }
+  bubbleIn($('n2'), t, 10.8, 'out'); if (t >= 11.4) $('n2').style.visibility = 'hidden';
+  dotsAnim($('n2').querySelector('.dots'), t);
+  // the status bar clock rewinds 23:31 to 22:47
+  const rw = io((t - 9.65) / .8); const mins = Math.round(lerp(23 * 60 + 31, 22 * 60 + 47, rw));
+  $('nst').textContent = `${Math.floor(mins / 60)}:${String(mins % 60).padStart(2, '0')}`;
+}
+
+function drawLight(t) {
+  const sc = $('lchat');
+  const on = t >= 14.4 && t < 32.2; sc.style.display = on ? '' : 'none'; if (!on) return;
+  $('lth').style.transform = `translateY(${threadY(t, M.l, LMSG)}px)`;
+  const L = M.l;
+  tf($('m0'), 0, 0, 1, 1);
+  // m1: appears in the logo's place, then grows into the reply
+  $('m1').style.visibility = t >= 15.2 ? 'visible' : 'hidden'; $('m1').style.opacity = 1; $('m1').style.transform = 'none';
+  morphBubble($('m1'), t, M.L.m1, 15.85);
+  const lu = sp(t - 16.25, 2.6); tf($('m1l'), 0, 12 * (1 - lu), 1, clamp((t - 16.25) / .2));
+  bubbleIn($('m2'), t, 17.4); bubbleIn($('m3'), t, 24.6);
+  const m4 = $('m4'); bubbleIn(m4, t, 25.25, 'out'); morphBubble(m4, t, M.L.m4, 25.8);
+  bubbleIn($('m5'), t, 29.75, 'out');
+  const m6 = $('m6'); const cu = sp(t - 30.15, 2.8); m6.style.transformOrigin = '50% 50%'; tf(m6, 0, 16 * (1 - cu), .9 + .1 * cu, clamp((t - 30.15) / .12));
+  $('m6c').style.strokeDashoffset = 1 - eo((t - 30.3) / .4);
+  // banner drops, opens into the answer sheet, types, sends, folds away
+  const ban = $('ban');
+  const bd = sp(t - 27.0, 2.6), bh = lerp(200, 620, io((t - 27.9) / .55)) - 420 * io((t - 29.45) / .4), bx = io((t - 29.75) / .4);
+  ban.style.height = bh + 'px';
+  tf(ban, 0, -240 * (1 - bd) - 300 * bx, 1, t < 27 ? 0 : 1 - sm((t - 29.85) / .3));
+  const full = T('Oui, 30 000 FCFA le plateau. À commander avant jeudi.');
+  const n = Math.floor(clamp((t - 28.4) / 1.0) * full.length);
+  $('atx').textContent = full.slice(0, n);
+  $('acar').style.opacity = t < 29.4 ? 1 : 0;
+  const pr = clamp(1 - Math.abs(t - 29.42) / .09);
+  const sd = $('asend'); sd.style.boxShadow = `0 ${6 * (1 - pr)}px 0 0 #17602d`; sd.style.transform = `translateY(${6 * pr}px)`;
+}
+
+function drawLogo(t) {
+  const lg = $('logo'), img = $('lgimg'), fill = $('lgfill'), dots = $('lgdots');
+  let vis = t >= 11.4 && t < 15.2;
+  lg.style.display = vis ? '' : 'none'; if (!vis) return;
+  dotsAnim(dots, t);
+  const F = { x: 410, y: 520, w: 260, h: 260, r: 57 };
+  let R, col = [31, 122, 58], imgO = 0, dotO = 0, rTL = null;
+  if (t < 14.4) {
+    // from Kemi's typing bubble to the mark
+    const r = M.N.n2; const ty = threadY(11.4, M.n, NMSG) + 200 + r.y;
+    const a = phoneMap(11.4, 680 - 22 - 132, ty);
+    const u = io((t - 11.4) / .55);
+    R = { x: lerp(a.x, F.x, u), y: lerp(a.y, F.y, u), w: lerp(132 * a.s, F.w, u), h: lerp(84 * a.s, F.h, u), r: lerp(30 * a.s, F.r, u) };
+    rTL = lerp(30, F.r, u); dotO = 1 - sm((t - 11.4) / .2); imgO = sm((t - 11.75) / .3);
+    const d = sm((t - 12) / 2.4) * 8; R.y -= d;
+  } else {
+    const r = M.L.m1; const u = io((t - 14.4) / .8);
+    const ty = threadY(t, M.l, LMSG) + 200 + r.y; const b = phoneMap(t, 680 - 22 - 132, ty);
+    R = { x: lerp(F.x, b.x, u), y: lerp(F.y - 8, b.y, u), w: lerp(F.w, 132 * b.s, u), h: lerp(F.h, 84 * b.s, u), r: lerp(F.r, 30 * b.s, u) };
+    imgO = 1 - sm((t - 14.8) / .25); col = [31, 122, 58].map((v, i) => lerp(v, [217, 253, 211][i], sm((t - 14.85) / .3)));
+    dotO = sm((t - 14.95) / .2);
+    dots.querySelectorAll('i').forEach(i => i.style.background = mix([255, 255, 255], [143, 168, 138], sm((t - 14.85) / .3)));
+  }
+  lg.style.left = R.x + 'px'; lg.style.top = R.y + 'px'; lg.style.width = R.w + 'px'; lg.style.height = R.h + 'px';
+  lg.style.borderRadius = t < 14.4 ? `${R.r}px ${t < 12 ? lerp(8, R.r, io((t - 11.4) / .55)) : R.r}px ${R.r}px ${R.r}px` : `${R.r}px ${lerp(R.r, 8, io((t - 14.4) / .8))}px ${R.r}px ${R.r}px`;
+  fill.style.background = `rgb(${col.map(Math.round).join(',')})`;
+  img.style.opacity = imgO; dots.style.opacity = dotO;
+}
+
+function drawMenu(t) {
+  const L = $('mlayer');
+  const vis = t >= 19.8 && t < 24.7; L.style.display = vis ? '' : 'none'; if (!vis) return;
+  // match cut: the menu's price lands where the bubble's price was, then the camera pulls back
+  const z = 2.6 * 37 / 40; const u = io((t - 20.05) / .95);
+  const s = lerp(z, 1, u) * (1 + .02 * sm((t - 20.9) / 2.8));
+  const cx = lerp(M.mprice.x, 540, u), cy = lerp(M.mprice.y, 900, u);
+  const px = 1150 * io((t - 23.7) / .9);
+  L.style.transform = `translate(${540 - cx * s - px}px,${960 - cy * s}px) scale(${s})`;
+  L.style.opacity = sm((t - 19.9) / .25);
+  MENU.forEach((r, i) => { const a = 21.0 + i * .24; const hl = $('mh' + i); hl.style.transform = `scaleX(${eo((t - a) / .35)})`; hl.style.opacity = 1 - .65 * sm((t - a - .35) / .4) });
+  const f = sp(t - 21.0, 2.6); tf($('mfile'), 0, 20 * (1 - f), 1, clamp((t - 21.0) / .15));
+  const d = sp(t - 22.35, 3); $('mdone').style.transformOrigin = '0 50%'; tf($('mdone'), 0, 0, .85 + .15 * d, clamp((t - 22.35) / .1));
+  $('mchk').style.strokeDashoffset = 1 - eo((t - 22.45) / .35);
+}
+
+function drawPlatform(t) {
+  const pc = $('pc'); const vis = t >= 31.2 && t < 37.0; pc.style.display = vis ? '' : 'none'; if (!vis) return;
+  // grows out of the "Retenu" chip, becomes the number card, then the voice note
+  const r6 = M.L.m6; const ty = threadY(31.2, M.l, LMSG) + 200 + r6.y; const a = phoneMap(31.2, (680 - r6.w) / 2, ty);
+  const u = io((t - 31.2) / .75), v = io((t - 33.55) / .6);
+  const W = 820, HA = 300, HB = 460;
+  const fx = 130, fyA = 790, fyB = 700;
+  let x = lerp(a.x, fx, u), y = lerp(a.y, fyA, u), w = lerp(r6.w * a.s, W, u), h = lerp(62 * a.s, HA, u);
+  y = lerp(y, fyB, v); h = lerp(h, HB, v);
+  // falls into the phone that rises for the payoff
+  const q = io((t - 35.95) / .45);
+  const s = (1 + .18 * u) * (1 - .4 * q); y += 220 * q;
+  pc.style.left = x + 'px'; pc.style.top = y + 'px'; pc.style.width = w + 'px'; pc.style.height = h + 'px';
+  pc.style.borderRadius = lerp(31, 32, u) + 'px'; pc.style.transform = `scale(${s})`; pc.style.transformOrigin = '50% 50%'; pc.style.opacity = 1 - sm((t - 35.95) / .35);
+  pc.style.background = mix([227, 239, 223], [255, 253, 249], sm((t - 31.25) / .4)); pc.style.borderColor = mix([185, 220, 192], [226, 219, 204], sm((t - 31.25) / .4));
+  $('pcA').style.opacity = sm((t - 31.6) / .3) * (1 - sm((t - 33.55) / .2));
+  const ch = sp(t - 32.25, 3); $('pchip').style.transformOrigin = '0 50%'; tf($('pchip'), 0, 0, .85 + .15 * ch, clamp((t - 32.25) / .1));
+  $('pchk').style.strokeDashoffset = 1 - eo((t - 32.35) / .35);
+  $('pcB').style.opacity = sm((t - 33.85) / .3);
+  // play turns to pause while the note plays
+  const pl = t > 34.0 && t < 35.6;
+  $('ppl').setAttribute('d', pl ? 'M8.5 7h2.4v10H8.5zM13.1 7h2.4v10h-2.4z' : 'M9.5 7.2v9.6L17 12z');
+  const prog = clamp((t - 34.0) / 1.6);
+  WV.forEach((hh, i) => { const on = i / WV.length < prog; $('wv' + i).style.background = on ? '#15160f' : '#cfc9bb' });
+  $('pdur').textContent = `0:0${Math.min(6, Math.floor(prog * 6))}`.replace('0:00', '0:06').replace(/^0:0(\d)$/, (m, d) => prog > 0 && prog < 1 ? `0:0${d}` : '0:06');
+  TRANS.forEach((w, i) => { const a2 = 34.55 + i * .13; $('tw' + i).style.color = mix([207, 201, 187], [21, 22, 15], sm((t - a2) / .2)) });
+}
+
+function drawForm(t) {
+  const f = $('form'); const e = sp(t - 43.0, 2.2);
+  tf(f, 0, 70 * (1 - e), 1, clamp((t - 43.0) / .25));
+  const full = T('aicha@moncommerce.com'); const n = Math.floor(clamp((t - 43.55) / .9) * full.length);
+  $('ftx').textContent = full.slice(0, n); $('fcar').style.opacity = t > 43.4 && t < 44.75 ? 1 : 0;
+  const btn = $('fbtn'); const pr = clamp(1 - Math.abs(t - 45.05) / .1);
+  const ok = io((t - 45.2) / .4);
+  btn.style.background = mix([31, 122, 58], [227, 239, 223], ok);
+  btn.style.border = ok > 0 ? `1px solid ${mix([31, 122, 58], [185, 220, 192], ok)}` : 'none';
+  btn.style.boxShadow = `0 ${8 * (1 - pr) * (1 - ok)}px 0 0 #17602d`; btn.style.transform = `translateY(${8 * pr * (1 - ok) + 8 * ok}px)`;
+  $('fbl').style.opacity = 1 - sm((t - 45.2) / .15); $('fok').style.opacity = sm((t - 45.35) / .2);
+  $('fchk').style.strokeDashoffset = 1 - eo((t - 45.45) / .35);
+  const l = sp(t - 46.2, 2.2); tf($('endrow'), 0, 40 * (1 - l), 1, clamp((t - 46.2) / .3));
+}
+
+function drawCaps(t) {
+  capEls.forEach(c => {
+    const on = t >= c.t0 - .05 && t <= c.t1 + .5; c.d.style.display = on ? '' : 'none'; if (!on) return;
+    const x = ei((t - c.t1) / .35);
+    if (c.move) { const u = io((t - 42.0) / .7); c.d.style.transformOrigin = '540px 0'; c.d.style.transform = `translateY(${330 * (1 - u)}px) scale(${lerp(1.5, 1, u)})` }
+    c.words.forEach(([s, a]) => { const u = eo((t - a) / .6); s.style.filter = `blur(${14 * (1 - u) + 10 * x}px)`; s.style.transform = `translateY(${24 * (1 - u) - 16 * x}px)`; s.style.opacity = u * (1 - x) });
+  });
+  // the title and CTA type live in frame space; the title exits early with the logo
+}
+
+const G = $('grain'), gx = G.getContext('2d'), GI = gx.createImageData(360, 640);
+function drawGrain(t, night) {
+  const r = mulberry32(Math.floor(t * FPS + .5) * 7919 + 13), d = GI.data;
+  for (let i = 0; i < d.length; i += 4) { const v = r() * 255; d[i] = d[i + 1] = d[i + 2] = v; d[i + 3] = 255 }
+  gx.putImageData(GI, 0, 0); G.style.opacity = lerp(.035, .075, night); G.style.mixBlendMode = 'overlay';
+}
+
+function nightness(t) {
+  if (t < 11.75) return 1; if (t < 12.55) return 1 - io((t - 11.75) / .8);
+  if (t < 36.0) return 0; if (t < 36.8) return io((t - 36) / .8);
+  if (t < 40.95) return 1; if (t < 41.75) return 1 - io((t - 40.95) / .8); return 0;
+}
+
+window.seek = function (t) {
+  if (!M) measure();
+  t = clamp(t, 0, DUR);
+  // price point in world at 19.15 for the camera push
+  { const r = M.L.m1; const ty = threadY(19.15, M.l, LMSG) + 200 + r.y; PRICE_W = { x: PH.x + M.price.x, y: PH.y + 200 + threadY(19.15, M.l, LMSG) + M.price.y } }
+  // background: the paper spreads from the mark at the turn and from the phone at the CTA
+  const bg = $('bg'), rv = $('reveal');
+  if (t < 12.6) { bg.style.background = 'var(--night)'; const R = 2300 * eo((t - 11.75) / .85); rv.style.clipPath = `circle(${R}px at 540px 670px)` }
+  else if (t < 36.0) { bg.style.background = 'var(--paper)'; rv.style.clipPath = 'none' }
+  else if (t < 41.0) { bg.style.background = mix(PAPER, NIGHT, io((t - 36) / .8)); rv.style.clipPath = 'circle(0px at 540px 960px)' }
+  else { bg.style.background = 'var(--night)'; const R = 2300 * eo((t - 40.95) / .9); rv.style.clipPath = `circle(${R}px at 540px 960px)` }
+  const [cs, ccx, ccy] = camera(t);
+  $('world').style.transform = `translate(${540 - ccx * cs}px,${960 - ccy * cs}px) scale(${cs})`;
+  const p = phoneState(t); const ph = $('phone');
+  ph.style.transform = `translate(${p.x}px,${p.y}px) scale(${p.s})`; ph.style.opacity = p.o; ph.style.display = p.o <= 0 ? 'none' : '';
+  const lockOn = t < 6.4 || (t >= 36 && t < 41.8); $('lock').style.display = lockOn ? '' : 'none';
+  if (lockOn) drawLock(t);
+  $('nchat').style.display = t < 12.3 ? '' : 'none'; if (t < 12.3) drawNight(t);
+  drawLight(t); drawLogo(t); drawMenu(t); drawPlatform(t);
+  $('form').style.display = t >= 42.9 ? '' : 'none'; $('endl').style.display = t >= 46.1 ? '' : 'none';
+  if (t >= 42.9) drawForm(t);
+  drawCaps(t); drawGrain(t, nightness(t));
+};
+</script>
+</body></html>
