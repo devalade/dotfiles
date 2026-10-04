@@ -26,7 +26,7 @@ Check the tools in the first five minutes, not on day two:
 
 | Need | Default | Notes |
 | --- | --- | --- |
-| Motion and render | [HyperFrames](https://hyperframes.heygen.com) (HTML + GSAP to MP4) | `npx hyperframes skills` installs its agent skills. Read `/hyperframes-core` before writing composition HTML. |
+| Motion and render | [HyperFrames](https://hyperframes.heygen.com) (HTML + GSAP to MP4) | `npx hyperframes skills` installs its agent skills. Read `/hyperframes-core` before writing composition HTML. For a single reel with no reason to be on a framework, `motion-seek-engine` renders the same purity with zero dependencies. |
 | Voice | [Cartesia](https://cartesia.ai) Sonic (`scripts/audio/tts-cartesia.ts`) | ElevenLabs works too. The key goes in an env var. Record a scratch voice in the first pass. |
 | Music | [Suno](https://suno.com) or a licensed track | Once a track is liked, ask for continuations of it, not a fresh batch. |
 | Transcription | faster-whisper or `npx hyperframes transcribe` | Word timestamps feed captions and voice splitting. |

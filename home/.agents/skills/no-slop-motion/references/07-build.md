@@ -28,6 +28,7 @@ Rules that keep it working:
 
 - **Never type a raw second in a scene file.** Get every time from the plan, a word in a VO line, or the scene's window. Then a retimed voice line moves every beat attached to it.
 - **Every pixel is a pure function of time.** HyperFrames seeks to frames in any order, on several workers. No `Math.random`, no `Date`, no network, no state carried from the previous frame. Seed jitter and grain from the frame number.
+- **Route A instead.** If there is no reason to be on HyperFrames — one reel, a loop, a morph chain — `motion-seek-engine` renders the same purity with zero dependencies: one `index.html` with `window.seek(t)`, Playwright walking time, ffmpeg encoding, plus a closed-form spring library (springs that stay pure functions of time instead of GSAP eases), beat-grid + synthesized-SFX tooling, and contact-sheet QA. The process in this skill drives either route.
 - **Explicit initial states.** Frame 0 of every scene must be set, not inherited. An empty frame 0 is a common bug.
 - **The same object everywhere.** The broken thing in the problem half and the fixed thing in the product half must be the same component. Continuity is story logic, and a props bible is how you keep it.
 - **SVG icons, not emoji.** Emoji often render as boxes in headless capture.
