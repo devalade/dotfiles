@@ -168,6 +168,34 @@ task, and Logpush for anything you need to keep.
 | Subscriptions | Plan and add-on checks | `accounts` |
 | Audit | Who changed what | `accounts` |
 
+## Long tail
+
+Smaller namespaces. Most projects never touch them; know they exist so you do
+not rebuild them badly.
+
+| Product | Use when | Namespace |
+|---|---|---|
+| Builds | Cloudflare builds Workers from a connected repo | `builds` |
+| Previews | Per-branch Worker previews | `previews` |
+| Snippets | Small code fragments injected at the edge, no Worker deploy | `snippets` |
+| Addressing | Bring your own IP ranges | `addressing` |
+| Custom CSRs | Certificates from your own CSR | `custom-csrs` |
+| Custom nameservers | Vanity nameservers on your zone | `custom-nameservers` |
+| Custom pages | Branded error and challenge pages | `custom-pages` |
+| Cloudforce One | Threat intel platform for security teams | `cloudforce-one` |
+| Managed Defense | Managed detection and response | `managed-defense` |
+| Magic network monitoring | Flow-based network telemetry and alerts | `magic-network-monitoring` |
+| MCP servers | Give agents a Cloudflare API surface | `mcp` |
+| Agent Memory | Persisted memory service for agents | `agent-memory` |
+| Pay per use | Metered billing for your own product | `pay-per-use` |
+| Tenant | Tenant-level configuration | `tenant` |
+| Account tags | Tag and filter accounts | `account-tags` |
+| User profile | Your own account, tokens, invitations | `user` |
+
+MCP is worth a look if you want an agent to manage Cloudflare directly: it is a
+smaller surface than the whole CLI and scoped per task. It does not replace `cf`
+for deploys.
+
 ## Void coverage
 
 | Level | Meaning | Products |
