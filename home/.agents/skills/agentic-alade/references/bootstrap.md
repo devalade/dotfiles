@@ -169,6 +169,10 @@ input; `pnpm typecheck` clean.
 
 ## 8. Deploy
 
+Before deploy, pick any infrastructure the product needs (DNS, cache, WAF,
+Access, mail domains) from `cloudflare-services.md`, and record each one in
+`AGENTS.md` with its limit.
+
 ```bash
 cf auth whoami || cf auth login
 cf init .

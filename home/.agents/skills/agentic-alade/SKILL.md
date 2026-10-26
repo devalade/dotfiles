@@ -117,7 +117,8 @@ command you have run once.
 
 Details, file tree, and exact configs: `references/stack.md`. Data layer,
 dialects, type pipeline, typed fetch, KV, R2, durable state, and env:
-`references/data.md`.
+`references/data.md`. Every Cloudflare product, by job:
+`references/cloudflare-services.md`.
 
 ## Backend surface
 

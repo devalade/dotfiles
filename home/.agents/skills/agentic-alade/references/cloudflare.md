@@ -1,5 +1,8 @@
 # Cloudflare reference: `cf` first, Void for the app upload
 
+Product-by-product map of what Cloudflare offers and when to reach for it:
+`cloudflare-services.md`. This file is about the CLI and deployment.
+
 `cf` is Cloudflare's CLI for the whole public API (2,900+ operations), built for
 agents: JSON on stdout, `cf cli search` for discovery, and
 `cloudflare.config.ts` for typed configuration. Wrangler is legacy for new work.
