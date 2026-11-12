@@ -184,9 +184,8 @@ for skill_path in "$TARGET_SKILLS"/*; do
   fi
 done
 
-# Remove stale Codex symlinks
+# Remove stale Codex symlinks (broken links included: -e follows the target)
 for stale in "$CODEX_SKILLS"/*; do
-  [[ -e "$stale" ]] || continue
   [[ -L "$stale" ]] || continue
   skill_name="$(basename "$stale")"
   if [[ ! -d "$TARGET_SKILLS/$skill_name" ]]; then

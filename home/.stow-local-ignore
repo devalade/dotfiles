@@ -1,0 +1,5 @@
+# Paths deployed by another mechanism, not by stow.
+# Agent skills are rsynced by .agents/sync-skills.sh (`dot skills sync`).
+\.agents/skills
+# Vendored pstack source, installed by its own install.sh.
+\.agents/pstack-opencode

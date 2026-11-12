@@ -8,7 +8,14 @@ home/.config/opencode/amp_stuff/
 backups/
 packages/failed_packages_*.txt
 tmp/
-.DS_STORE
+.DS_Store
+
+# skill sync artifacts (deployed by sync-skills.sh, never committed)
+home/.agents/skills/synced/
+home/.agents/skills/*.backup.*
+
+# opencode runtime
+.opencode/node_modules/
 
 
 # Python
@@ -68,3 +75,6 @@ home/.config/davinci-captions/node_modules/
 home/.pi/agent/skills/ui/
 home/.pi/agent/skills/account-id-tags/
 
+
+# pstack source checkout (installed by its own install.sh, pinned upstream)
+home/.agents/pstack-opencode/
