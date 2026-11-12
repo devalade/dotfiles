@@ -15,13 +15,13 @@ exempt.
 
 | Phase | Load | Use it for |
 |---|---|---|
-| 0 Spec | `to-prd`, `tech-spec`, `product-thinking`, `understand-customers` | Job, flow, data shape, pain audit |
+| 0 Spec | `to-prd`, `tech-spec`, `product-thinking`, `understand-customers`, `grill-me` | Job, flow, data shape, pain audit, unanswered questions |
 | 1 Tokens | `prototype`, `principle-exhaust-the-design-space` | Two or three visual directions compared before committing |
 | 2 Primitives | `pick-ui-library`, `control-ui`, `high-end-visual-design`, `design-taste-frontend` | Component shape, states, density |
 | 3 Patterns | `architect`, `implement`, `code-like-alade` | Composition, interfaces, ownership |
 | 4 Data | `domain-modeling`, `typescript-best-practices`, `principle-model-the-domain` | Types, schema, invariants |
 | 5 Flows | `implement`, `tdd`, `unslop` | Wiring, copy, empty states |
-| 6 Ship | `review-and-ship`, `principle-prove-it-works`, `verify-this`, `run-smoke-tests`, `dogfood` | Proof, regressions, outside-in check |
+| 6 Ship | `review-and-ship`, `principle-prove-it-works`, `verify-this`, `run-smoke-tests`, `dogfood`, `interrogate`, `arena` | Proof, regressions, outside-in check |
 | Any Cloudflare work | `cloudflare`, `workers-best-practices`, `durable-objects`, `wrangler` | Product choice, rules, gotchas |
 
 Hard gates that come from the pack:
@@ -71,7 +71,13 @@ Every "done" carries one of:
 - a failing-then-passing test.
 
 For this stack specifically: `pnpm lint`, `pnpm typecheck`, a real
-request against the deployed URL, and one log read after that request.
+request against the deployed URL, and one log read after that request. A
+visual change also carries a before/after pair, and a flow change carries the
+scenario row id it turns green.
+
+Continuous proof is `scripts/quality.sh`: fast on commit, smoke on deploy,
+watch nightly, one JSON line per run in `docs/quality.log`. A red row names
+itself and fails the loop.
 
 ## Reply style
 
