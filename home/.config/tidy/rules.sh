@@ -11,9 +11,9 @@
 # --- Downloads: keyword rules (PDFs and office docs first) ---
 DOWNLOADS_KEYWORDS=(
   "(cv|resume|r[ée]sum[ée])"                 "Documents/CV"
-  "(facture|invoice|contrat|kbis|devis|re[çc]u|taxe|paie|smic|urssaf)"  "Documents/Finance"
+  "(facture|invoice|contrat|kbis|devis|re[çc]u|taxe|paie|smic)"  "Documents/Finance"
   "(examen|m[ée]moire|chapter|chapitre|cours|guide|mod[èe]le|esgis|master|l3|td[ _-]|tp[ _-]|syllabus)" "Documents/School"
-  "(beniloc|qualiextra|front desk|ycer|sanny|openhub|jobs|pipeline|opii)" "Documents/Work"
+  "(beniloc|qualiextra|front desk|ycer|sanny|openhub|jobs|pipeline)" "Documents/Work"
   "(whatsapp|telegram|meta|notion)"   "Documents/Social"
 )
 
