@@ -1,5 +1,5 @@
 # Ghostty theme (follows macOS light/dark appearance)
-theme = Kanagawa Lotus
+theme = light:Catppuccin Latte,dark:Catppuccin Macchiato
 
 # Updates
 auto-update-channel = tip
@@ -46,3 +46,7 @@ window-padding-y = 0
 # Decrease scroll sensitivity
 mouse-scroll-multiplier = 0.4
 
+
+# >>> Scene: managed include. Remove this block to detach Scene. >>>
+config-file = ?"/Users/macuser/.config/ghostty/scene.conf"
+# <<< Scene <<<
