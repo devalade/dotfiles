@@ -1,0 +1,39 @@
+{
+  "favorites": [
+    {
+      "provider": "opencode",
+      "model": "deepseek/deepseek-flash"
+    },
+    {
+      "provider": "opencode",
+      "model": "opencode-go/deepseek-v4.1-flash"
+    }
+  ],
+  "projectSettingsOverrides": {
+    "fe095122-4f1c-4907-8d2f-443ac0e74b0d": {
+      "enableAgentDeviceAccess": true
+    }
+  },
+  "projectSettingsFolded": true,
+  "idleCompaction": "onReturn",
+  "providerInstances": {
+    "opencode": {
+      "driver": "opencode",
+      "displayName": "OpenCode",
+      "enabled": true,
+      "config": {
+        "serverUrl": "http://127.0.0.1:49374",
+        "serverPassword": "••••••"
+      }
+    },
+    "claudeAgent_claude_asin": {
+      "driver": "claudeAgent",
+      "displayName": "Claude ASIN",
+      "enabled": true,
+      "config": {
+        "homePath": "~/.claude-work",
+        "launchArgs": "--dangerously-skip-permissions"
+      }
+    }
+  }
+}
