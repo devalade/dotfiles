@@ -2,6 +2,16 @@
 
 set -euo pipefail
 
+# Homebrew binaries are missing from PATH in non-interactive shells, which
+# breaks this CLI when it is run from scripts, cron jobs or coding agents.
+for _brew_bin in /opt/homebrew/bin /usr/local/bin; do
+    if [[ -d "$_brew_bin" && ":$PATH:" != *":$_brew_bin:"* ]]; then
+        PATH="$_brew_bin:$PATH"
+    fi
+done
+export PATH
+unset _brew_bin
+
 # Colors for output
 readonly RED='\033[0;31m'
 readonly GREEN='\033[0;32m'
@@ -21,7 +31,7 @@ readonly DOTFILES_DIR
 readonly PACKAGES_DIR="${DOTFILES_DIR}/packages"
 readonly HOME_DIR="${DOTFILES_DIR}/home"
 readonly GITHUB_EMAIL="aladecharaf23@gmail.com"
-readonly GITHUB_KEY_PATH="${HOME}/.ssh/key.pub"
+readonly GITHUB_KEY_PATH="${HOME}/.ssh/id_ed25519.pub"
 readonly FONT_REPO_URL=""  # set to your own font repo URL if you use _install_font
 
 # Progress indicators
@@ -656,43 +666,42 @@ cmd_doctor() {
         ((++issues))
     fi
     
-    # Check jj (Jujutsu)
-    if command_exists jj; then
-        print_success "jj (Jujutsu) installed"
-        
-        # Check if jj config exists
-        local jj_config="${HOME}/.config/jj/config.toml"
-        if [[ -f "$jj_config" ]]; then
-            print_success "jj config found"
-            
-            # Check if user is configured
-            if grep -q "^\[user\]" "$jj_config" && grep -q "email" "$jj_config"; then
-                print_success "jj user configured"
-            else
-                print_warning "jj user not configured in config.toml"
-                print_info "Add [user] section with name and email"
-            fi
+    # Stow parity: the whole home/ package must restow without conflicts
+    if command_exists stow; then
+        local stow_conflicts
+        stow_conflicts="$(stow -n -d "${DOTFILES_DIR}" -t "${HOME}" home 2>&1 \
+            | grep -cE 'cannot stow|not owned' || true)"
+        if [[ "${stow_conflicts:-0}" -eq 0 ]]; then
+            print_success "Stow tree is clean (no conflicts)"
         else
-            print_warning "jj config not found at $jj_config"
-            print_info "Run 'jj config edit --user' to configure"
+            print_error "Stow reports ${stow_conflicts} conflicts"
+            print_info "Run 'dot stow' for the full list before it breaks an update"
+            ((++issues))
         fi
-    else
-        print_warning "jj (Jujutsu) not installed"
-        print_info "Install with: brew install jj"
     fi
     
-    # Check symlinks
+    # Check symlinks in directories this repo manages (deep enough for nvim)
     local broken_links=0
+    local broken_list=()
     while IFS= read -r -d '' link; do
         if [[ ! -e "$link" ]]; then
+            broken_list+=("$link")
             ((++broken_links))
         fi
-    done < <(find "${HOME}" -maxdepth 3 -type l -print0 2>/dev/null)
+    done < <(find "${HOME}/.config" "${HOME}/.local/bin" "${HOME}/.agents" \
+            "${HOME}/.claude" "${HOME}/.codex" "${HOME}/.pi" "${HOME}/.t3" \
+            "${HOME}/Library/LaunchAgents" -maxdepth 4 -type l -print0 2>/dev/null)
     
     if [[ $broken_links -eq 0 ]]; then
         print_success "No broken symlinks found"
     else
         print_warning "Found $broken_links broken symlinks"
+        local shown=0
+        for link in "${broken_list[@]}"; do
+            [[ $shown -ge 5 ]] && break
+            print_info "  ${link/#$HOME/~}"
+            ((++shown))
+        done
     fi
     
     # Check SSH key
@@ -717,7 +726,7 @@ cmd_doctor() {
     done
 
     # Additional tools managed outside the registry (brew packages, etc.)
-    local extra_tools=("git" "nvim" "tmux" "node" "npm")
+    local extra_tools=("git" "nvim" "herdr" "node" "npm")
     for tool in "${extra_tools[@]}"; do
         if command_exists "$tool"; then
             print_success "$tool is available"
@@ -730,12 +739,12 @@ cmd_doctor() {
         print_warning "Missing development tools: ${missing_tools[*]}"
     fi
     
-    # Check if dotfiles directory is in PATH
-    if echo "$PATH" | grep -q "$DOTFILES_DIR"; then
-        print_success "Dotfiles directory is in PATH"
+    # Check if the installed `dot` launcher is on PATH
+    if command_exists dot; then
+        print_success "dot is on PATH ($(command -v dot))"
     else
-        print_warning "Dotfiles directory not in PATH - 'dot' command may not work globally"
-        print_info "Add 'export PATH=\"$DOTFILES_DIR:\$PATH\"' to your shell profile"
+        print_warning "dot is not on PATH"
+        print_info "Run 'dot link' to install it into ~/.local/bin"
     fi
     
     if [[ $issues -eq 0 ]]; then
@@ -807,23 +816,8 @@ cmd_unlink() {
 
 cmd_stow() {
     print_header "Stowing dotfiles"
-    
-    if ! command_exists stow; then
-        print_error "GNU Stow is not installed"
-        print_info "Install it first: brew install stow"
-        return 1
-    fi
-    
-    print_info "Creating symlinks for dotfiles..."
-    
-    if stow -R -v -d "${DOTFILES_DIR}" -t "${HOME}" home; then
-        print_success "Dotfiles stowed successfully"
-        print_info "Configuration files are now symlinked to your home directory"
-    else
-        print_error "Failed to stow dotfiles"
-        print_info "Check for conflicting files in your home directory"
-        return 1
-    fi
+    _stow_dotfiles || return 1
+    print_info "Configuration files are now symlinked to your home directory"
 }
 
 cmd_edit() {
