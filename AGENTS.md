@@ -12,7 +12,7 @@ macOS dev env via GNU Stow. Neovim + Tmux + Git + pi. (Shell: zsh, user-managed)
 ├── dot                 # CLI: init/update/doctor/stow/package (2500 lines bash)
 ├── home/.config/       # Stowed to ~/.config/
 │   ├── nvim/           # Editor (AGENTS.md)
-│   ├── tmux/           # Multiplexer + TPM plugins
+│   ├── herdr/          # Terminal multiplexer (replaced tmux)
 │   ├── git/            # Conditional work config
 │   ├── ghostty/        # Terminal
 │   ├── starship.toml   # Prompt (custom.scm, 2s timeout for Vite+)
@@ -23,6 +23,7 @@ macOS dev env via GNU Stow. Neovim + Tmux + Git + pi. (Shell: zsh, user-managed)
 ├── home/.pi/           # Pi agent workspace (AGENTS.md)
 │   ├── agent/extensions/ # 6 TypeScript extensions
 │   └── agent/skills/   # Populated by `dot skills sync` -> ~/.agents/skills
+├── home/.t3/           # T3 Code config (settings, keybindings; no state/secrets)
 ├── packages/
 │   ├── bundle          # Base Brewfile (32 formulas, 13 casks)
 │   └── bundle.work     # Work additions (formulas only)
@@ -37,7 +38,7 @@ macOS dev env via GNU Stow. Neovim + Tmux + Git + pi. (Shell: zsh, user-managed)
 | Git alias | `home/.config/git/config` [alias] section |
 | Neovim plugin | `home/.config/nvim/lua/plugins/<name>.lua` |
 | Neovim keymap | `home/.config/nvim/lua/config/keymaps.lua` |
-| Tmux binding | `home/.config/tmux/tmux.conf` |
+| Herdr keybinds | `home/.config/herdr/config.toml` |
 | Starship prompt | `home/.config/starship.toml` |
 | Pi extension | `home/.pi/agent/extensions/<name>/` |
 | Pi skill | `home/.agents/skills/<name>/SKILL.md` |
@@ -47,13 +48,17 @@ macOS dev env via GNU Stow. Neovim + Tmux + Git + pi. (Shell: zsh, user-managed)
 | Grok worker rule | `home/.grok/rules/pi-worker.md` |
 | Work git identity | Auto via `home/.config/git/work_config` for `~/Code/work/` |
 | Resolve captions | `home/.config/davinci-captions/` (Handy + MediaBunny, no ffmpeg) |
+| T3 Code settings | `home/.t3/userdata/settings.json` (providers, favorites) |
+| T3 Code keybindings | `home/.t3/userdata/keybindings.json` |
+| T3 Code UI prefs | `home/.t3/userdata/client-settings.json` |
 
 ## CONVENTIONS
 
 - Stow layout: `home/` mirrors `~`, stow creates symlinks
 - Neovim: 1 plugin per file in `lua/plugins/`, returns lazy.nvim spec
 - Private helpers: prefix `__` (e.g., `__git.default_branch`)
-- Agent skills: canonical pool at `home/.agents/skills/`, symlinked into each agent's dir
+- Agent skills: canonical pool at `home/.agents/skills/`, rsynced to `~/.agents/skills` and symlinked into each agent's dir; stow skips them via `home/.stow-local-ignore`
+- Two deployers, never one tree: stow owns everything except `.agents/skills` and `.agents/pstack-opencode`, which `dot skills sync` and pstack's installer own
 - Pi extensions: TypeScript, npm workspaces under `home/.pi/`
 - Pi skills: Markdown-first (`SKILL.md`) with optional bundled resources
 
@@ -86,7 +91,7 @@ dot captions install  # Local captions for Resolve free: deps + script link + Ha
 | Tool | Entry | Notes |
 |------|-------|-------|
 | Neovim | `init.lua` | LazyVim: `require("config.lazy")` |
-| Tmux | `tmux.conf` | Prefix `C-;`, auto-installs TPM |
+| Herdr | `herdr/config.toml` | Prefix `ctrl+a`, vim pane nav, theme auto-switch |
 | Git | `config` | SSH signing, `pull.rebase`, conditional include |
 | Starship | `starship.toml` | 2s timeout (Vite+ shims), custom.scm after dir |
 | Tidy | `tidy/rules.sh` | Downloads/Documents organizer (keyword + ext buckets) |
@@ -96,9 +101,9 @@ dot captions install  # Local captions for Resolve free: deps + script link + Ha
 
 ## UNIQUE STYLES
 
-- tmux prefix: `C-;` (not `C-b`)
-- tmux splits: `\` horizontal, `Enter` vertical
-- tmux extended-keys: `always` + CSI-u (required for pi/claude-code)
+- herdr prefix: `ctrl+a`
+- herdr splits: `prefix+v` vertical, `prefix+minus` horizontal
+- herdr pane nav: `prefix+h/j/k/l` (no prefix-free nav, so nvim keeps plain h/l)
 - nvim: `jj`/`JJ` exit insert, `H`/`L` line start/end
 - nvim completion: blink.cmp (not nvim-cmp), LSP source score_offset=1000
 - git: `fomo` = fetch origin main + rebase

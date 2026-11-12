@@ -39,7 +39,7 @@ After installation, the `dot` command will be available globally for ongoing man
 │   ├── .config/
 │   │   ├── git/       # Git configuration
 │   │   ├── nvim/      # Neovim configuration
-│   │   ├── tmux/      # Tmux configuration
+│   │   ├── herdr/     # Herdr multiplexer config
 │   │   └── ...
 │   └── .ideavimrc     # IntelliJ IDEA Vim config
 ├── packages/
@@ -99,7 +99,7 @@ dot doctor
 ```
 Comprehensive diagnostics including:
 - ✅ Homebrew installation
-- ✅ Essential tools (git, nvim, tmux, node, etc.)
+- ✅ Essential tools (git, nvim, herdr, node, etc.)
 - ✅ pi installation and core development tools
 - ✅ PATH configuration
 - ⚠️ Broken symlinks detection
@@ -175,7 +175,7 @@ dot package remove docker base  # Remove docker from base bundle only
 #### Package Files
 
 **`packages/bundle`** - Base packages for all machines:
-- Development tools: neovim, tmux, git
+- Development tools: neovim, herdr, git
 - CLI utilities: ripgrep, fd, fzf, starship
 - Applications: Arc browser, Raycast, OrbStack
 - AI tools: aider
@@ -339,6 +339,15 @@ dot doctor
 # Re-stow if needed
 dot stow
 ```
+
+### CI
+
+Every push to `main` and every pull request runs `.github/workflows/checks.yml`:
+
+- `bash -n` and `shellcheck --severity=error` on `dot` and the agent scripts
+- a stow dry run that fails on any conflict
+- JSON validation for the T3 Code and pi configs
+- a secret scan for API keys and private keys
 
 ## Advanced Usage
 
