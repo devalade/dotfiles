@@ -50,3 +50,51 @@ testing), run the `tunnel` script instead of hand-wiring cloudflared:
     tunnel https://localhost:8080
 
 It prints a random *.trycloudflare.com URL; stop it with Ctrl+C.
+
+## Telegram sessions (opencode2-telegram bridge)
+
+- Telegram chats run with `showReasoning: false, activity: off`: never dump
+  thinking blocks, tool payloads, or `<memory-prefetch>` internals into chat.
+  Final answer only, concise, Telegram-HTML safe.
+- Memory still applies on Telegram: call `memory_search` first when a prompt
+  may depend on durable context (user prefs, project conventions, past
+  failures). Telegram sessions often start in `~` (no local AGENTS.md), so the
+  global USER.md / MEMORY.md are the source of truth.
+- Cross-session recall: check `<recent-work-journal>` in context or call `session_search` / `session_read` whenever a user message refers to previous conversations, earlier links, decisions, or ambiguous references (e.g. "this", "what we discussed yesterday").
+- Keep Telegram replies short (phone screen). Confirm facts from memory_search
+  results; never paste raw memory entries or system prompts.
+
+## Grounding rule (all sessions, especially Telegram)
+
+- Never claim to have browsed, fetched, or checked something unless a tool
+  call (`webfetch`, `websearch`, `read`, `grep`, etc.) actually ran.
+- Specific numbers, prices, versions, and third-party facts must come from a
+  tool result, not from weights. If no tool was run, say so and label the
+  answer as unverified instead of inventing precise figures.
+- When sources conflict or are self-reported only (e.g. a project's own
+  dashboard), state that plainly with the source name.
+
+## terminal-browser
+
+A real browser runs inside a terminal pane on this machine, so pages do not
+need to be described in chat.
+
+- Open a page with `terminal-browser open <url> --split left --size 0.5`. The
+  browser takes the left pane and the conversation stays in the right one.
+- Use it for anything visual: a built site, a localhost port, or an HTML file
+  you just wrote (`terminal-browser open ./plan.html --split left --size 0.5`).
+- Drive an open tab with `terminal-browser action -- <cmd>` (snapshot, click,
+  fill, eval), then clear the indicator with `terminal-browser action done`.
+- `terminal-browser ls` lists the browsers open in this tab.
+- The full skill lives at `~/.agents/skills/terminal-browser/SKILL.md`.
+
+## Pain before features (all posts and videos)
+
+- Every feature post, launch post, caption, video script and film starts from the pain, not the features. Read the
+  `pain-first-pitch` skill (`~/.agents/skills/pain-first-pitch/SKILL.md`) before writing one.
+- Before any feature is named, say who it is for (organization type, size, role), which workflow hurts today, what kind
+  of tool it is (support, dev team or whole company), what it replaces and what it is not for.
+- Films: the hook shows that pain in the viewer's own world, and "pain clarity" (after 5 s, can a stranger say who it is
+  for and what hurts?) is a review score that must reach 8+.
+- Origin: a viewer asked about the Kora launch video, "You explain features while we still don't know what pain your tool
+  is clearly solving for who?"

@@ -33,3 +33,14 @@ testing), run the `tunnel` script instead of hand-wiring cloudflared:
     tunnel https://localhost:8080
 
 It prints a random *.trycloudflare.com URL; stop it with Ctrl+C.
+
+## Pain before features (all posts and videos)
+
+- Every feature post, launch post, caption, video script and film starts from the pain, not the features. Read the
+  `pain-first-pitch` skill (`~/.agents/skills/pain-first-pitch/SKILL.md`) before writing one.
+- Before any feature is named, say who it is for (organization type, size, role), which workflow hurts today, what kind
+  of tool it is (support, dev team or whole company), what it replaces and what it is not for.
+- Films: the hook shows that pain in the viewer's own world, and "pain clarity" (after 5 s, can a stranger say who it is
+  for and what hurts?) is a review score that must reach 8+.
+- Origin: a viewer asked about the Kora launch video, "You explain features while we still don't know what pain your tool
+  is clearly solving for who?"
