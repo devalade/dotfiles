@@ -47,6 +47,7 @@ cask "obs"
 cask "orbstack"
 cask "raycast"
 cask "scroll-reverser"
+cask "terminal-browser"
 # cask "spotify"
 cask "yaak@beta"
 
