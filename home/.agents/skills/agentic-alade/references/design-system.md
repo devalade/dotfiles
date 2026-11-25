@@ -13,7 +13,10 @@ features, make it small, and let a linter hold the line.
 | Routes | `src/routes/` | composition, loaders, params | styling beyond layout |
 
 Interactive primitives are generated with `shadcn add` on Base UI and wrapped
-with the project's semantic tokens. Never Radix.
+with the project's semantic tokens. Never Radix. When Base UI does not ship an
+interaction (command palette, typeahead, drag and drop), build the primitive
+from `@ui-sdk/core` behaviors with `@ui-sdk/react`; it obeys the same contract
+below and joins the gallery.
 
 A route file that contains `p-4`, `text-lg`, or `bg-white` is a refactor ticket.
 

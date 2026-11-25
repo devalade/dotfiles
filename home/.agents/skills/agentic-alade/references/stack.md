@@ -73,7 +73,7 @@ pnpm add -D oxlint@^1.94.0 tsrs@0.25.0-ts7.1.0-beta @cloudflare/oxlint-config
 | Variants | `cva` + `cn` | Static, lintable class strings |
 | Code lint | Oxlint + `@cloudflare/oxlint-config` | Errors only, type-aware via `tsrs`, nkzw base |
 | Design gate | `@shadcn/lint` | Six rules at `error`, agent-readable messages |
-| Components | shadcn/ui on Base UI | Same component API as Radix, stable, no Radix dependency |
+| Components | shadcn/ui on Base UI; UI SDK for the long tail | Base UI standard set; `@ui-sdk` behaviors for interactions Base UI lacks |
 | Coordination | Durable Objects | Per-entity state, alarms, WebSockets |
 | Deploy | `cf`, fallback Void | `cf` owns the account; Void owns the app upload when `cf build` cannot |
 

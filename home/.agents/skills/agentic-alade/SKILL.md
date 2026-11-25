@@ -138,7 +138,7 @@ run once.
 | Type flow | zod contracts in `packages/contracts`; typed `hc` client; no server functions |
 | Auth | Better Auth served from `apps/api`; cookies for web, bearer for mobile |
 | Styling | Tailwind v4 CSS-first, hand-authored `@theme` tokens, CVA variants |
-| Components | shadcn/ui on Base UI, never Radix |
+| Components | shadcn/ui on Base UI; UI SDK for what Base UI lacks | Base UI standard set; `@ui-sdk` behaviors for the long tail, never Radix |
 | Code lint | Oxlint 1.94+ with `@cloudflare/oxlint-config`, type-aware via `tsrs`, errors only |
 | Design gate | `@shadcn/lint` at `error` on all six rules |
 | React health | react-doctor CLI + PR CI + agent skill |
@@ -173,6 +173,11 @@ before it enters a plan. Record the result in `AGENTS.md`.
   size or variant to the primitive, or use the token.
 - One component per file, named exports, `cva` for variants, `cn` for
   conditionals. Two sizes and two variants beat five.
+- Base UI is the floor; UI SDK is the extension lane. Standard interactions
+  come from Base UI. When Base UI does not ship one (command palette,
+  typeahead, drag and drop), build the primitive from `@ui-sdk/core`
+  behaviors with `@ui-sdk/react`. Native HTML first for the simple case, and
+  never two libraries for the same job.
 - Every primitive carries a contract comment and a gallery entry. The gallery
   is the review surface; the designer reviews states, not diffs.
 - Rules live in `oxlint.config.ts`, not in prose nobody runs. Extend
@@ -394,6 +399,11 @@ to `void deploy --platform cloudflare`. Record both decisions and reasons in
 - **Radix is banned.** Init with `shadcn init --base base`. Base UI uses
   `render` instead of `asChild`, `Backdrop` instead of `Overlay`, and nullable
   Select values, so Radix-era examples do not apply.
+- **Two primitive sources, one contract.** UI SDK primitives
+  (`definePrimitive` + `createParts`) obey the same file, `data-slot`, token,
+  and gallery law as Base UI ones. UI SDK is beta: dialog centering and
+  `::backdrop` are manual, `CommandEmpty` stays mounted empty, and
+  `ComboboxItem` needs `label=` when rows carry secondary text.
 - **Generated shadcn components ship raw values.** Restyle them to the
   project's semantic tokens before they enter `src/components/ui/`.
 - **Gallery in production.** Guard `/design` behind dev or an explicit flag.
