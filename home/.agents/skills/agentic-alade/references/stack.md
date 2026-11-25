@@ -67,7 +67,7 @@ pnpm add -D oxlint@^1.94.0 tsrs@0.25.0-ts7.1.0-beta @cloudflare/oxlint-config
 | API | Hono in a native Void app | Real REST for web, mobile, webhooks; full Void surfaces; versioned `/api/v1` |
 | Platform SDK | Void, both apps | Binding inference, migrations, deploy, no adapter glue |
 | Database | Postgres via Hyperdrive | One connection string shares across both apps; D1 only single-app |
-| ORM | Drizzle via `void/db` | Types from schema; no extra install |
+| ORM | Drizzle via `void/db`, one version | Types from schema; the version Void ships, never mixed |
 | Auth | Better Auth, served from `apps/api` | One auth server; cookies for web, bearer for mobile |
 | Styling | Tailwind v4 + AlignUI tokens | CSS-first `@theme`, OKLCH, no config file |
 | Variants | `cva` + `cn` | Static, lintable class strings |
@@ -398,6 +398,11 @@ API app. `apps/web` calls `/api/v1` with the `hc` client built from
 ## Version discipline
 
 - Keep the `void` package and the global CLI on the same version.
+- One drizzle version: whatever `void/db` ships, never a second `drizzle-orm`
+  or `drizzle-kit` at the root. As of Nov 2026 the stable line is 0.45 and 1.0
+  is release-candidate only (`@rc` tag, breaking changes in every RC). Move
+  to 1.0 when it is stable and Void adopts it, upgrading `void` and drizzle
+  together in one commit.
 - Upgrade deliberately: read the changelog, run `void info` before and after,
   deploy once to staging before production.
 - One machine performs the first deploy; every other machine pulls the lock

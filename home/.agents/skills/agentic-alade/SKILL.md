@@ -338,6 +338,11 @@ to `void deploy --platform cloudflare`. Record both decisions and reasons in
   from one machine only, then commit the lock file.
 - **Schema drift stops deploys.** Run `void db generate`, read the SQL, commit
   it, deploy again.
+- **Drizzle version drift breaks `void db generate`.** Void pins drizzle; a
+  second `drizzle-orm` or `drizzle-kit` at the root, or upgrading one side
+  alone, produces migrations Void cannot apply. One version, the one Void
+  ships. The 1.0 line is release-candidate only for now; adopt it when Void
+  does, together in one commit.
 - **Void typed fetch exists only inside the API app.** `apps/web` calls
   `/api/v1` with the `hc` client built from `packages/contracts`; it never
   imports `void/client` and never mounts Void routes.
