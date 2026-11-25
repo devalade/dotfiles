@@ -12,6 +12,9 @@ features, make it small, and let a linter hold the line.
 | Patterns | `src/components/patterns/` | composition, layout, empty/loading/error states | new colors, new type steps |
 | Routes | `src/routes/` | composition, loaders, params | styling beyond layout |
 
+Interactive primitives are generated with `shadcn add` on Base UI and wrapped
+with the project's semantic tokens. Never Radix.
+
 A route file that contains `p-4`, `text-lg`, or `bg-white` is a refactor ticket.
 
 ## Tokens
@@ -22,7 +25,7 @@ Three tiers, one direction of dependency. App code may only use tier 2.
 /* src/styles.css */
 @import "tailwindcss";
 
-/* Tier 1: primitives. Written by @alignui/cli tailwind. Never used in app code. */
+/* Tier 1: primitives. Hand-authored in OKLCH. Never used in app code. */
 @theme {
   --color-gray-50: oklch(0.985 0.002 250);
   --color-gray-900: oklch(0.24 0.01 250);
@@ -208,6 +211,7 @@ Conventions:
 - Composition over configuration: `asChild` or a `render` prop beats ten
   optional props.
 - React 19: no `forwardRef`.
+- Base UI uses `render` instead of `asChild`; never copy Radix-era component examples.
 
 ## Ownership boundary
 
@@ -264,48 +268,78 @@ is missing from the gallery, it does not exist.
 
 ## Lint gate
 
-`.oxlintrc.json`:
+Two layers, one config file. `@cloudflare/oxlint-config` is the code-quality
+floor: strict equality, owned promises, no unsafe `any`, type-only imports.
+`@shadcn/lint` is the design-system gate: no raw color, arbitrary value, or
+inline style.
 
-```json
-{
-  "jsPlugins": ["@shadcn/lint"],
-  "ignorePatterns": ["src/components/ui/**", "src/routeTree.gen.ts"],
-  "settings": {
-    "shadcn": {
-      "ui": "@/components/ui",
-      "componentImports": ["^@/components/patterns(/|$)"],
-      "mergeFunctions": ["cn"],
-      "variantFunctions": ["cva", "buttonVariants"],
-      "note": "docs/design-system.md is the source of truth. Ask before adding a component."
-    }
+`scripts/setup-lint.mjs --shadcn` writes this file. If you edit it by hand,
+keep every spread below.
+
+`oxlint.config.ts`:
+
+```ts
+import cloudflare from '@cloudflare/oxlint-config'
+import { defineConfig } from 'oxlint'
+
+export default defineConfig({
+  ...cloudflare,
+  jsPlugins: [...(cloudflare.jsPlugins ?? []), '@shadcn/lint'],
+  ignorePatterns: [
+    ...cloudflare.ignorePatterns,
+    'src/components/ui/**',
+    'src/routeTree.gen.ts',
+  ],
+  settings: {
+    shadcn: {
+      ui: '@/components/ui',
+      componentImports: ['^@/components/patterns(/|$)'],
+      mergeFunctions: ['cn'],
+      variantFunctions: ['cva', 'buttonVariants'],
+      note: 'docs/design-system.md is the source of truth. Ask before adding a component.',
+    },
   },
-  "rules": {
-    "shadcn/no-restyle": [
-      "error",
+  rules: {
+    ...cloudflare.rules,
+    'shadcn/no-restyle': [
+      'error',
       {
-        "allow": ["layout"],
-        "contracts": [
-          { "pattern": "^Button$", "allow": ["layout"] },
-          { "pattern": "^CardTitle$", "allow": ["layout", "typography"], "deny": ["font-*"] },
-          { "pattern": "^CardContent$", "allow": ["layout", "spacing"] }
-        ]
-      }
+        allow: ['layout'],
+        contracts: [
+          { pattern: '^Button$', allow: ['layout'] },
+          { pattern: '^CardTitle$', allow: ['layout', 'typography'], deny: ['font-*'] },
+          { pattern: '^CardContent$', allow: ['layout', 'spacing'] },
+        ],
+      },
     ],
-    "shadcn/no-raw-colors": "error",
-    "shadcn/no-arbitrary-values": "error",
-    "shadcn/no-inline-styles": "error",
-    "shadcn/no-unknown-classes": "error",
-    "shadcn/require-static-classes": "error"
-  }
-}
+    'shadcn/no-raw-colors': 'error',
+    'shadcn/no-arbitrary-values': 'error',
+    'shadcn/no-inline-styles': 'error',
+    'shadcn/no-unknown-classes': 'error',
+    'shadcn/require-static-classes': 'error',
+  },
+})
 ```
 
-- Primitives are exempt: they are where styling is allowed to live.
+- Spread `cloudflare`, `cloudflare.rules`, `cloudflare.ignorePatterns`, and
+  `cloudflare.jsPlugins`. A plain `rules: {}` replaces the preset and silently
+  turns the code-quality floor off; a plain `jsPlugins: []` drops the nkzw
+  plugins and Oxlint fails to parse their rules.
+- Install `oxlint@^1.94.0`, `tsrs@0.25.0-ts7.1.0-beta`, and
+  `@cloudflare/oxlint-config`. Without `tsrs` the type-aware rules do not run.
+- Keep `tsc --noEmit` as a separate command. Type-aware lint is not a
+  replacement for compiler diagnostics.
+- Primitives are exempt from the design gate: they are where styling is allowed
+  to live.
 - Patterns and routes are linted. That is the point.
-- All six rules at `error`. `warn` is ignored by agents and humans alike.
+- All six shadcn rules at `error`. `warn` is ignored by agents and humans alike.
 - Keep `note` short and actionable; agents read it.
-- `package.json`: `"lint": "oxlint src"`, `"lint:fix": "oxlint src --fix"`.
-- `AGENTS.md`: "After making changes, run `pnpm lint` and fix all errors."
+- `package.json`: `"lint": "oxlint ."`, `"lint:fix": "oxlint . --fix"`.
+- `AGENTS.md`: "After making changes, run `pnpm lint` and `pnpm typecheck`, and
+  fix all errors."
+
+Rule-by-rule fixes, React exceptions, and the migration procedure:
+`references/lint.md`.
 
 ## UI review checklist
 

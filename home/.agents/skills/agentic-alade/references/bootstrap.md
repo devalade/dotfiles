@@ -46,21 +46,15 @@ Notes:
 
 ## 2. Design tokens
 
-```bash
-pnpm dlx @alignui/cli tailwind
-```
+Hand-author the tokens in `src/styles.css` (Tailwind v4 CSS-first, no token
+generator):
 
-The CLI asks for primary, neutral, color format (OKLCH), and an optional class
-prefix. It writes a CSS-first `@theme` block and installs Tailwind v4.1.
-
-Then, in the generated stylesheet:
-
-1. Keep the primitive palette it wrote. Never reference those names outside
-   this file.
-2. Add the semantic layer (`:root` + `.dark`) from `design-system.md`.
-3. Map it with `@theme inline` so utilities resolve to CSS variables.
-4. Delete or rename anything you will not use; an unused token is a future
-   wrong choice.
+1. Primitive palette in OKLCH: every color step, radius, shadow, duration,
+   and type step the product could need. Never referenced outside this file.
+2. Semantic layer (`:root` + `.dark`) from `design-system.md`, mapped with
+   `@theme inline` so utilities resolve to CSS variables.
+3. Delete anything you will not use; an unused token is a future wrong
+   choice.
 
 Acceptance: `<div className="bg-background text-foreground">` renders, switches
 correctly in dark mode, and `grep -rn "#[0-9a-fA-F]\{3,8\}" src/` returns
@@ -235,7 +229,7 @@ and `cf workers deployments list` (or `void project status`) shows both deploys.
 ## Stack
 Monorepo: apps/web (TanStack Start, rendering only), apps/api (native Void
 app, Hono handlers at /api/v1), packages/{domain,db,contracts}. Void on both
-apps; Postgres via Hyperdrive; Tailwind v4 + AlignUI tokens; Better Auth in
+apps; Postgres via Hyperdrive; Tailwind v4, hand-authored @theme tokens; Better Auth in
 apps/api. Package manager: pnpm.
 
 ## Structure

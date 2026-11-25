@@ -81,9 +81,10 @@ Gate: one page, no open questions about who does what, a named entity list, and
 every failure, role, and repeat-action case from the floor has a matrix row.
 
 **1. Tokens.**
-Tailwind v4 CSS-first theme via `@alignui/cli`, then the semantic layer and the
-dark values. Gate: every color, radius, shadow, duration, and type step used by
-the product exists as a semantic token; `grep` finds no raw value in
+Tailwind v4 CSS-first `@theme`, hand-authored in `src/styles.css`: the
+primitive palette in OKLCH, then the semantic layer and the dark values. No
+token generator. Gate: every color, radius, shadow, duration, and type step
+used by the product exists as a semantic token; `grep` finds no raw value in
 `src/components`.
 
 **2. Primitives.**
@@ -136,7 +137,7 @@ run once.
 | Database | Postgres via Hyperdrive by default (one connection string shares across apps); D1 for a single app only |
 | Type flow | zod contracts in `packages/contracts`; typed `hc` client; no server functions |
 | Auth | Better Auth served from `apps/api`; cookies for web, bearer for mobile |
-| Styling | Tailwind v4 CSS-first, AlignUI tokens, CVA variants |
+| Styling | Tailwind v4 CSS-first, hand-authored `@theme` tokens, CVA variants |
 | Components | shadcn/ui on Base UI, never Radix |
 | Code lint | Oxlint 1.94+ with `@cloudflare/oxlint-config`, type-aware via `tsrs`, errors only |
 | Design gate | `@shadcn/lint` at `error` on all six rules |
@@ -264,7 +265,7 @@ pnpm dlx @tanstack/cli@latest create apps/web
 cd apps/web
 pnpm add -D void && pnpm void init             # voidPlugin() first, docs, agent skill
 pnpm dlx shadcn@latest init --base base           # Base UI, never Radix
-pnpm dlx @alignui/cli tailwind                     # tokens; run before any custom CSS
+# tokens: hand-author @theme in src/styles.css (primitive palette + semantic layer)
 
 # 2. API app: native Void app; its handlers run on Hono
 cd ../..
@@ -317,8 +318,9 @@ to `void deploy --platform cloudflare`. Record both decisions and reasons in
   `cf migrate`, then delete the old file.
 - **Do not run `cf init`, `cf dev`, `cf build`, or `cf deploy` in a Wrangler
   project.** Automatic configuration rewrites `package.json` and `vite.config`.
-- **`@alignui/cli tailwind` overwrites CSS and the Tailwind config.** Run it
-  before any custom CSS exists, or move the generated block by hand.
+- **Hand-authored tokens drift without the gate.** The primitive palette in
+  `src/styles.css` is the only place raw OKLCH values exist. `grep` for hex,
+  `rgb(`, and `p-[` in `src/` on every PR; one leak is a refactor ticket.
 - **`skill tanstack-start` is Vinxi-era.** Trust `tanstack.com/start` and the
   Cloudflare/Void pages over it; the API surface moved to
   `@tanstack/react-start/plugin/vite`.
@@ -392,8 +394,8 @@ to `void deploy --platform cloudflare`. Record both decisions and reasons in
 - **Radix is banned.** Init with `shadcn init --base base`. Base UI uses
   `render` instead of `asChild`, `Backdrop` instead of `Overlay`, and nullable
   Select values, so Radix-era examples do not apply.
-- **Generated shadcn components ship raw values.** Restyle them to AlignUI
-  semantic tokens before they enter `src/components/ui/`.
+- **Generated shadcn components ship raw values.** Restyle them to the
+  project's semantic tokens before they enter `src/components/ui/`.
 - **Gallery in production.** Guard `/design` behind dev or an explicit flag.
 - **Deleting a customer pain is not free.** Every absorbed pain needs a cost
   line; unmeasured absorption becomes an outage you did not budget for.

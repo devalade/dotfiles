@@ -69,7 +69,7 @@ pnpm add -D oxlint@^1.94.0 tsrs@0.25.0-ts7.1.0-beta @cloudflare/oxlint-config
 | Database | Postgres via Hyperdrive | One connection string shares across both apps; D1 only single-app |
 | ORM | Drizzle via `void/db`, one version | Types from schema; the version Void ships, never mixed |
 | Auth | Better Auth, served from `apps/api` | One auth server; cookies for web, bearer for mobile |
-| Styling | Tailwind v4 + AlignUI tokens | CSS-first `@theme`, OKLCH, no config file |
+| Styling | Tailwind v4, hand-authored `@theme` | CSS-first tokens in OKLCH, no config file, no token generator |
 | Variants | `cva` + `cn` | Static, lintable class strings |
 | Code lint | Oxlint + `@cloudflare/oxlint-config` | Errors only, type-aware via `tsrs`, nkzw base |
 | Design gate | `@shadcn/lint` | Six rules at `error`, agent-readable messages |
@@ -354,8 +354,8 @@ Radix is not used. Base UI conventions that differ from Radix-era examples:
 - Anchored popups use `Portal > Positioner > Popup`; overlays use `Backdrop`,
   not `Overlay`.
 - Select values are nullable (`null` for placeholder), not empty strings.
-- Generated files land in `src/components/ui/` with AlignUI semantic tokens.
-  Restyle registry raw utility values before commit.
+- Generated files land in `src/components/ui/` with the project's semantic
+  tokens. Restyle registry raw utility values before commit.
 
 ## Coordination
 
