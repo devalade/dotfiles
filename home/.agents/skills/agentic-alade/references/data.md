@@ -5,21 +5,22 @@ right before the first feature; migrations after launch are the expensive kind.
 
 ## What works where
 
-| Concern | Void API | TanStack Start |
+| Concern | apps/api (native Void) | apps/web (framework mode) |
 |---|---|---|
-| Type pipeline | Drizzle → `RouteMap` → typed fetch | Drizzle → `createServerFn` → props |
+| Type pipeline | Drizzle → `RouteMap` → typed fetch | zod contracts → typed client → loaders |
 | D1 (SQLite) | `database` default | Yes |
 | PostgreSQL | `database: "pg"` via Hyperdrive | Yes |
 | MySQL | `database: "mysql"` via Hyperdrive | Yes |
-| Typed fetch | `fetch` from `void/client` | No, use server functions |
-| KV | `void/kv` | Yes |
-| Object storage | `void/storage` | Yes |
-| Durable state | `defineDurableState` | Yes, custom `cloudflare.main` |
+| Typed fetch | `fetch` from `void/client` | typed client built from `packages/contracts` |
+| KV | `void/kv` | via `/api/v1` only |
+| Object storage | `void/storage` | via `/api/v1` only |
+| Durable state | `defineDurableState` | via `/api/v1` only |
 | Env vars | `env.ts` + `void/env` | Yes |
 
-Void's typed fetch validates paths against `routes/`, which Void owns. In
-framework mode TanStack owns routing, so type safety comes from
-`createServerFn` and route loaders instead. Do not import `void/client` there.
+The web app hosts no backend surfaces: KV, storage, and durable state are
+reached through `/api/v1`, never imported into `apps/web`. Void's typed fetch
+validates paths against `routes/` and lives in the API app; the web app calls
+the same handlers through the typed client built from `packages/contracts`.
 
 ## Type safety
 
@@ -35,11 +36,12 @@ The pipeline in a Void app:
 Generated types live in `.void/` and update on change. Run `void prepare` in CI
 before typechecking.
 
-The TanStack equivalent:
+The web app equivalent:
 
-- Schema is still the source of truth (`db/schema.ts`).
-- `createServerFn` with a validator gives the client a typed function, which is
-  better than a typed URL: it cannot drift from the route table.
+- Contracts in `packages/contracts` are the wire source of truth (zod
+  schemas); handlers parse with them and the client is generated from them.
+- OpenAPI generated from the same contracts covers mobile and any other
+  consumer.
 - Route `loader` return types reach components through `Route.useLoaderData()`.
 - Types never cross into a client bundle unless the value does.
 
@@ -86,7 +88,7 @@ Postgres and MySQL specifics:
 ## Schema and migrations
 
 ```ts
-// db/schema.ts, D1
+// packages/db/schema.ts, D1
 import { sqliteTable, text, integer } from 'void/schema-d1'
 import { sql } from 'void/db'
 
@@ -100,12 +102,12 @@ export const invoices = sqliteTable('invoices', {
 ```
 
 ```ts
-// db/schema.ts, Postgres
+// packages/db/schema.ts, Postgres
 import { pgTable, serial, text, integer, timestamp } from 'void/schema-pg'
 ```
 
 ```ts
-// db/schema.ts, MySQL
+// packages/db/schema.ts, MySQL
 import { int, mysqlTable, text, timestamp } from 'void/schema-mysql'
 ```
 
@@ -145,15 +147,17 @@ const open = await db
   .where(and(eq(invoices.status, 'open'), eq(invoices.currency, 'XOF')))
 ```
 
-- `@schema` is the alias to `db/schema.ts` that Void configures.
+- `@schema` is the alias to `packages/db/schema.ts` that Void configures.
 - Select only the columns the surface needs; `select()` returns everything and
   leaks new columns into responses.
 - Paginate with a stable cursor (id or timestamp + id), not offset, once a list
   can grow.
-- Keep queries in `src/lib/<domain>` next to the rule they serve, not scattered
+- Keep queries in `packages/domain` next to the rule they serve, not scattered
   in components.
 
-## Typed fetch (Void apps only)
+## Typed fetch
+
+Inside the API app:
 
 ```ts
 import { fetch } from 'void/client'
@@ -167,16 +171,21 @@ const user = await fetch('/api/users/:id', { params: { id: '42' } })
 - Non-2xx throws `FetchError`.
 - Query and params are typed from the handler's validator.
 
-TanStack Start equivalent:
+From `apps/web` (and mobile), call the API with the typed client built from
+`packages/contracts`:
 
 ```ts
-export const listUsers = createServerFn({ method: 'GET' }).handler(async () => {
-  return db.select({ id: users.id, name: users.name }).from(users)
-})
+import { client } from '@contracts/client'
 
-// in a route loader or component
-const users = await listUsers()
+const users = await client.users.list()
 ```
+
+- Preferred mechanism is `hc<AppType>` when the API app exports a chained
+  Hono app type; otherwise generate the client from the contracts' OpenAPI
+  spec with `openapi-typescript`. Probe which one works on first wire-up and
+  record it in `AGENTS.md`.
+- The generated client is a build artifact of the contracts package; it is
+  never hand-edited.
 
 ## KV
 

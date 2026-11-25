@@ -7,24 +7,47 @@ TanStack Start docs (October 2026). Re-check `https://void.cloud/llms.txt`,
 and pages move. Inside an initialized app, prefer the version-matched docs at
 `node_modules/void/docs/` (`guide/quickstart.md`, `reference/cli.md`).
 
-## Setup path (TanStack Start + Void)
+## Setup path (monorepo: TanStack Start web + native Void API)
 
 ```bash
-# 1. Framework
-pnpm dlx @tanstack/cli@latest create my-app
-cd my-app
+# 0. Monorepo shell
+mkdir my-app && cd my-app && pnpm init
+
+# 1. Web app: TanStack Start in framework mode
+pnpm dlx @tanstack/cli@latest create apps/web
+cd apps/web
 
 # 2. Void: package first, then init. Void adds voidPlugin() to the Vite config
 #    and creates the remaining project files.
 pnpm add -D void
 pnpm void init          # or: pnpm exec void init
 
-# 3. Tell it the account and target once
-pnpm void connect --platform cloudflare
+# 3. API app: native Void app. Its handlers run on Hono.
+cd ../..
+pnpm create void apps/api          # creates the dir; choose the Cloudflare target
+cd apps/api
+pnpm add hono zod
+
+# 4. Shared packages: contracts (zod + client), domain (services), db (schema)
+cd ../..
+mkdir -p packages/contracts packages/domain packages/db
+
+# 5. shadcn components on Base UI, never Radix (inside apps/web)
+cd apps/web && pnpm dlx shadcn@latest init --base base
+
+# 6. Code-quality floor: Oxlint + the Cloudflare preset, at the repo root
+cd ../..
+pnpm add -D oxlint@^1.94.0 tsrs@0.25.0-ts7.1.0-beta @cloudflare/oxlint-config
+# write oxlint.config.ts spreading ...cloudflare; see references/lint.md
+
+# 7. Tell each app the account and target once
+(cd apps/web && pnpm void connect --platform cloudflare)
+(cd apps/api && pnpm void connect --platform cloudflare)
 ```
 
 - Void's quickstart: `https://void.cloud/guide/quickstart`.
 - Framework guide: `https://void.cloud/integrations/frameworks/tanstack-start`.
+- Hono in Void: `https://void.cloud/integrations/hono`.
 - `void init` writes an `AGENTS.md` section, links Void's `void` skill into the
   detected agent config, and can be re-run; it asks before editing existing
   instructions.
@@ -39,59 +62,102 @@ pnpm void connect --platform cloudflare
 
 | Concern | Choice | Why |
 |---|---|---|
-| Framework | TanStack Start | File routes, typed search params, server functions, streaming SSR, Vite |
-| Platform SDK | Void | Binding inference, typed D1, migrations, deploy, no adapter glue |
-| Database | D1 (SQLite) | Zero-ops, per-app, free-tier friendly; Postgres only when write-heavy or joins get real |
+| Shape | pnpm monorepo | `apps/web`, `apps/api`, `packages/{domain,db,contracts}` |
+| Web framework | TanStack Start | File routes, typed search params, streaming SSR, Vite; rendering only |
+| API | Hono in a native Void app | Real REST for web, mobile, webhooks; full Void surfaces; versioned `/api/v1` |
+| Platform SDK | Void, both apps | Binding inference, migrations, deploy, no adapter glue |
+| Database | Postgres via Hyperdrive | One connection string shares across both apps; D1 only single-app |
 | ORM | Drizzle via `void/db` | Types from schema; no extra install |
-| Auth | Better Auth | Void auth unsupported in framework mode |
+| Auth | Better Auth, served from `apps/api` | One auth server; cookies for web, bearer for mobile |
 | Styling | Tailwind v4 + AlignUI tokens | CSS-first `@theme`, OKLCH, no config file |
 | Variants | `cva` + `cn` | Static, lintable class strings |
+| Code lint | Oxlint + `@cloudflare/oxlint-config` | Errors only, type-aware via `tsrs`, nkzw base |
 | Design gate | `@shadcn/lint` | Six rules at `error`, agent-readable messages |
+| Components | shadcn/ui on Base UI | Same component API as Radix, stable, no Radix dependency |
 | Coordination | Durable Objects | Per-entity state, alarms, WebSockets |
 | Deploy | `cf`, fallback Void | `cf` owns the account; Void owns the app upload when `cf build` cannot |
 
 ## File tree
 
 ```
-src/
-  routes/
-    __root.tsx
-    index.tsx
-    design.tsx              # dev-only gallery
-  router.tsx
-  styles.css                # @theme primitives + semantic layer
-  components/
-    ui/                     # primitives, contract comments, CVA
-    patterns/               # composed, app-aware, reuse-first
-  lib/
-    format.ts               # money, dates, numbers
-    errors.ts               # typed error union
-db/
-  schema.ts                 # Drizzle tables via void/schema-d1
-  migrations/               # generated SQL, committed
-durable-objects/            # defineDurableState, hand-rolled DOs
-crons/                      # scheduled handlers
-queues/                     # producers + consumers
-email/                      # inbound handlers, Void apps only
-src/
-  live.ts                   # defineLiveStream, if used
-public/
-vite.config.ts
-void.config.ts
-cloudflare.config.ts
-package.json
-AGENTS.md
-docs/
-  spec.md
-  pain-ledger.md
-  design-system.md
-  build.md
+<repo>/
+  apps/
+    web/                      # TanStack Start + voidPlugin(): rendering only
+      src/
+        routes/
+          __root.tsx
+          _marketing/         # pathless layout group, the Next `(group)` feel
+            route.tsx
+            index.tsx
+            -components/      # `-` prefix: colocated, ignored by the router
+          _app/               # authed shell group
+            route.tsx
+            dashboard.tsx
+          design.tsx          # dev-only gallery
+        router.tsx
+        styles.css            # @theme primitives + semantic layer
+        components/
+          ui/                 # primitives, contract comments, CVA
+          patterns/           # composed, app-aware, reuse-first
+        lib/
+          format.ts           # money, dates, numbers
+          errors.ts           # typed error union
+      vite.config.ts          # voidPlugin() first, then tanstackStart()
+      components.json         # shadcn config, base library
+      cloudflare.config.ts    # only if cf owns the web deploy
+    api/                      # native Void app: the whole backend
+      routes/api/v1/          # URL = file path; versioned REST
+      middleware/             # cors, bearer-auth, rate limit (Hono middleware)
+      crons/                  # scheduled handlers
+      queues/                 # producers + consumers, auto-invoked locally
+      email/                  # inbound handlers
+      durable-objects/        # defineDurableState; rooms via routes/*.ws.ts
+      void.config.ts
+  packages/
+    contracts/                # zod schemas, OpenAPI spec, typed hc client
+    domain/                   # services: pure TS, deps as params, no framework imports
+    db/                       # drizzle schema.ts + migrations/ (committed)
+  docs/
+    spec.md
+    pain-ledger.md
+    design-system.md
+    build.md
+  AGENTS.md
+  pnpm-workspace.yaml
 ```
+
+## Routing (apps/web)
+
+Next-style organization, TanStack syntax:
+
+| Next.js | TanStack | Effect |
+|---|---|---|
+| `(marketing)/` | `_marketing/` | Shared layout, no URL segment |
+| `layout.tsx` | `route.tsx` | Wraps child routes |
+| `[id]/` | `$id` | Dynamic segment |
+| colocated components | `-` prefixed files | Ignored by route generation |
+
+```
+routes/
+  _app/
+    route.tsx              # authed shell
+    posts/
+      route.tsx            # optional posts-only layout
+      index.tsx            # /posts
+      $postId.tsx          # /posts/42
+      $postId.edit.tsx     # /posts/42/edit
+      -components/         # colocated, ignored by the router
+```
+
+Params are typed at the boundary: validate `params` in the route's
+`beforeLoad` with a zod schema and hand a branded id (`PostId`) to the domain.
+A raw string from the URL never enters `packages/domain`.
 
 ## Vite configuration
 
-`voidPlugin()` must come first. Do not also add `@cloudflare/vite-plugin`; Void
-supplies it.
+`voidPlugin()` must come first in `apps/web`. Do not also add
+`@cloudflare/vite-plugin`; Void supplies it. `apps/api` has no Vite config: as
+a native Void app, Void's own build handles it.
 
 ```ts
 // vite.config.ts
@@ -147,13 +213,16 @@ export default defineConfig({
 ```
 
 `void/env` supplies binding and Workers runtime types. Run `void prepare` after
-install when CI typechecks before deploy, so `.void/` types exist.
+install when CI typechecks before deploy, so `.void/` types exist. The lint
+preset holds the behavioral side of these types: no `any`, no unchecked `!`,
+strict equality, owned promises. See `references/lint.md`.
 
 ## Data
 
-Dialects: D1 by default, Postgres or MySQL via Hyperdrive (`database: "pg"`
-or `"mysql"`). Dialect choice, type pipeline, KV, R2, durable state, and env
-vars live in `data.md`.
+Dialects: Postgres via Hyperdrive by default in the two-app shape
+(`database: "pg"`; one connection string shares cleanly across both apps), D1
+only for a single app. Dialect choice, type pipeline, KV, R2, durable state,
+and env vars live in `data.md`.
 
 ```ts
 // db/schema.ts
@@ -187,33 +256,63 @@ Conventions:
   stops on schema drift, which is the correct failure.
 - Seed with realistic volume; three rows hide every pagination bug.
 
-## Server functions
+## API handlers (apps/api)
+
+Void route handlers run on Hono: use Hono middleware, helpers, and any
+`hono/*` package directly inside `defineHandler`. Paths under `routes/` define
+URLs; version everything under `routes/api/v1/`.
 
 ```ts
-import { createServerFn } from '@tanstack/react-start'
-import { z } from 'zod'
+// apps/api/routes/api/v1/invoices.ts
+import { defineHandler } from 'void'
 import { db } from 'void/db'
-import { invoices } from '@schema'
+import { CreateInvoice } from '@contracts/invoices'
+import { createInvoice } from '@domain/invoices'
 
-const CreateInvoice = z.object({
-  workspaceId: z.number().int().positive(),
-  amountMinor: z.number().int().positive(),
-  currency: z.string().length(3),
+export const POST = defineHandler(async (c) => {
+  const data = CreateInvoice.parse(await c.req.json())
+  const row = await createInvoice(db, data)
+  return c.json(row, 201)
 })
-
-export const createInvoice = createServerFn({ method: 'POST' })
-  .validator((input: unknown) => CreateInvoice.parse(input))
-  .handler(async ({ data }) => {
-    const [row] = await db.insert(invoices).values(data).returning()
-    return row
-  })
 ```
 
-- Parse at the boundary, trust inside. No `any` crossing the wire.
-- Business rules live in `src/lib/<domain>.ts` as pure functions; the handler
-  orchestrates.
-- Server-only modules must not be imported by route components except through
-  server functions or loaders.
+- Parse at the boundary with the contract from `packages/contracts`. The
+  domain service in `packages/domain` takes `db` as a parameter and imports
+  nothing from hono, void, or tanstack.
+- Cross-cutting middleware (cors, bearer-auth, rate limit) lives in
+  `middleware/*.ts`, ordered by filename.
+- Business rules stay pure and testable; the handler is a thin shell. No
+  `any` at the boundary.
+- `apps/web` never imports from `apps/api` internals; it calls `/api/v1`
+  through the typed `hc` client built from the contracts.
+
+The same domain on the API side. `[id]` is Void's dynamic segment, and
+`defineHandler.withValidator` types `body`, `query`, and `params` in one
+place, which also powers Void's typed fetch:
+
+```
+apps/api/routes/api/v1/
+  posts/
+    index.ts               # GET list, POST create → /api/v1/posts
+    [postId].ts            # GET, PATCH, DELETE → /api/v1/posts/42
+```
+
+```ts
+// apps/api/routes/api/v1/posts/[postId].ts
+import { z } from 'zod'
+import { defineHandler } from 'void'
+import { db } from 'void/db'
+import { PostId } from '@contracts/posts'
+import { getPost } from '@domain/posts'
+
+export const GET = defineHandler.withValidator({
+  params: z.object({ postId: PostId }),   // branded zod schema from contracts
+})(async (_c, { params }) => getPost(db, params.postId))
+```
+
+The API app has the same grouping tricks as the web: `(admin)` route groups
+do not change the URL, `_` or `.` prefixes exclude files, and `[...slug]`
+catches what nothing else matches.
 
 ## Bindings
 
@@ -235,13 +334,28 @@ Use raw `env` only where the typed helper does not cover the call.
 
 ## Auth
 
-Void-managed auth is not supported in framework mode. Use Better Auth's
-TanStack Start integration:
+One auth server: Better Auth is served from `apps/api`.
 
-- One `auth.ts` server module, cookie-based sessions, D1 adapter.
-- Session read in `__root.tsx` loader; route guards via `beforeLoad`.
+- One `auth.ts` server module in `apps/api`, cookie-based sessions, D1 or pg
+  adapter.
+- Web: cookie session on the shared domain. Read the session in `__root.tsx`
+  loader via the API; guard routes with `beforeLoad`.
+- Mobile: `@better-auth/expo` client, SecureStore sessions, app scheme in
+  `trustedOrigins`.
 - Never trust a user id from the client; resolve it from the session on the
   server for every mutation.
+
+## Components
+
+shadcn/ui components are generated on Base UI with `shadcn init --base base`.
+Radix is not used. Base UI conventions that differ from Radix-era examples:
+
+- `render` replaces `asChild`; use `nativeButton={false}` for non-button targets.
+- Anchored popups use `Portal > Positioner > Popup`; overlays use `Backdrop`,
+  not `Overlay`.
+- Select values are nullable (`null` for placeholder), not empty strings.
+- Generated files land in `src/components/ui/` with AlignUI semantic tokens.
+  Restyle registry raw utility values before commit.
 
 ## Coordination
 
@@ -257,22 +371,29 @@ TanStack Start integration:
 ## Commands
 
 ```bash
-pnpm dev                 # Vite dev server with the Void plugin, :5173
-pnpm void init              # once: voidPlugin(), project files, docs, agent skill
-pnpm void db generate       # generate a migration from the schema
-pnpm void prepare           # generate .void types for CI typecheck
-pnpm void info              # resource names, durable state map
-pnpm void deploy            # build, migrate, upload
-pnpm void project status    # also: logs, rollback
+# run inside apps/web
+pnpm dev                   # Vite dev server with the Void plugin, :5173
+pnpm void init             # once: voidPlugin(), project files, docs, agent skill
+
+# run inside apps/api
+pnpm dev                   # native Void dev server; queues auto-invoke locally
+pnpm void init             # once
+pnpm void db generate      # generate a migration from packages/db/schema.ts
+pnpm void prepare          # generate .void types for CI typecheck
+pnpm void info             # resource names, durable state map
+pnpm void deploy           # build, migrate, upload
+
+# either app
+pnpm void project status   # also: logs, rollback
 ```
 
 Void's version-matched docs ship in the package: `node_modules/void/docs/`.
 Read `guide/quickstart.md` and `reference/cli.md` when a command's flags are in
 doubt.
 
-`fetch` from `void/client` gives typed calls to Void app routes. In framework
-mode TanStack owns routing: call the server with `createServerFn`, not
-`void/client`.
+`fetch` from `void/client` gives typed calls to Void routes, usable inside the
+API app. `apps/web` calls `/api/v1` with the `hc` client built from
+`packages/contracts`. TanStack server functions do not exist in this stack.
 
 ## Version discipline
 

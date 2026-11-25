@@ -1,8 +1,11 @@
 # Backend reference: the nine surfaces
 
-Void covers most of the backend. Three surfaces are Void-app only, and the
-framework-mode answers differ. Verify each one you need with a 30 minute probe
-before designing around it, and write the result in `AGENTS.md`.
+The backend lives in `apps/api`, a native Void app: every surface below is
+supported there as documented, including WebSockets, inbound email, and local
+queue auto-invoke. `apps/web` hosts no backend surfaces; the "TanStack Start"
+column survives only as a record of framework-mode gaps. Verify each surface
+you need with a 30 minute probe before designing around it, and write the
+result in `AGENTS.md`.
 
 ## Support matrix
 

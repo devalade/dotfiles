@@ -7,21 +7,35 @@ fix it before moving on; later phases assume earlier ones are true.
 ## 1. Scaffold
 
 ```bash
-pnpm dlx @tanstack/cli@latest create <app>
-cd <app>
+mkdir <app> && cd <app> && pnpm init
+
+# web app: TanStack Start in framework mode
+pnpm dlx @tanstack/cli@latest create apps/web
+cd apps/web
 pnpm install
 pnpm add -D void
 pnpm void init        # or: pnpm exec void init
+cd ../..
+
+# api app: native Void app, Hono handlers
+pnpm create void apps/api
+cd apps/api
+pnpm add hono zod
+cd ../..
+
+mkdir -p packages/contracts packages/domain packages/db
 ```
 
 `void init` adds `voidPlugin()` to the Vite config, creates `void.config.ts` and
 the project files, appends an `AGENTS.md` section, links Void's own `void` skill
 into the agent config, and installs the version-matched docs at
 `node_modules/void/docs/`. Re-check `vite.config.ts`: `voidPlugin()` must be
-first, and there must be no separate Cloudflare adapter.
+first, and there must be no separate Cloudflare adapter. `apps/api` is native:
+no Vite config, Void's own build, full surfaces.
 
-Acceptance: `pnpm dev` serves at `http://localhost:5173`, `node_modules/void/docs/guide/quickstart.md`
-exists, and `git status` is clean after the first commit.
+Acceptance: both dev servers run (`apps/web` on `http://localhost:5173`),
+`node_modules/void/docs/guide/quickstart.md` exists in both apps, and
+`git status` is clean after the first commit.
 
 Notes:
 
@@ -55,23 +69,20 @@ nothing.
 ## 3. Lint gate
 
 ```bash
-pnpm add -D @shadcn/lint oxlint
+node ~/.agents/skills/agentic-alade/scripts/setup-lint.mjs --shadcn --baseline
 ```
 
-Create `.oxlintrc.json` from `design-system.md` and add scripts:
+The script installs the preset, writes `oxlint.config.ts` from the template in
+`design-system.md`, and adds `lint`, `lint:fix`, and `typecheck` scripts when
+they are missing. It refuses to overwrite an existing config; migrate that one
+with `lint.md`.
 
-```json
-{
-  "scripts": {
-    "lint": "oxlint src",
-    "lint:fix": "oxlint src --fix",
-    "typecheck": "tsc --noEmit"
-  }
-}
-```
-
-Acceptance: `pnpm lint` exits 0 on the scaffold, and exits non-zero when you
-temporarily add `bg-blue-500` to a component.
+Acceptance: `pnpm lint` exits 0 on the scaffold, exits non-zero when you
+temporarily add `bg-blue-500` to a component, and `pnpm typecheck` is clean.
+The config still contains `...cloudflare`, `...cloudflare.rules`, and
+`...(cloudflare.jsPlugins ?? [])`; a shallow merge is the failure mode to check
+for. Run `node ~/.agents/skills/agentic-alade/scripts/verify-lint-fixture.mjs`
+once to prove the preset still catches its rules.
 
 ## 4. Primitives and gallery
 
@@ -110,9 +121,10 @@ a form using patterns alone, with no raw classes in the page file.
 
 ## 6. Data
 
-Choose the dialect before the schema: D1 by default, Postgres or MySQL via
-Hyperdrive when writes, joins, or reporting dominate. Declare `env.ts` and a
-root `.env` before writing queries, then generate.
+Choose the dialect before the schema: Postgres via Hyperdrive by default in
+the two-app shape (one connection string shares across both apps), D1 only for
+a single app. Declare `env.ts` and a root `.env` before writing queries, then
+generate.
 
 ```bash
 pnpm void db generate     # after writing db/schema.ts
@@ -121,7 +133,7 @@ pnpm void env check
 
 Schema rules:
 
-- `db/schema.ts` is the only place table definitions live.
+- `packages/db/schema.ts` is the only place table definitions live.
 - Money as integer minor units, timestamps in UTC ISO text (D1) or `timestamp`
   (Postgres), soft delete only when the product needs recovery.
 - Add indexes for every foreign key and every filtered list query before the
@@ -135,22 +147,23 @@ query, and the migration is committed.
 Tick only the ones the product needs, then probe the risky ones before they
 enter the plan. Details and API shapes: `backend.md`.
 
-- Auth: Better Auth in TanStack Start. Verify sign-up, sign-in, session read,
-  one protected route, one mutation that trusts the session.
+- Auth: Better Auth served from `apps/api`. Verify sign-up, sign-in, session
+  read from web over the shared domain, one protected route, one mutation that
+  trusts the session.
 - AI: `void/ai` run plus stream. Verify a real model call in dev, a timeout, a
   `UsageLimit` path, and one production call.
 - Email sending: `void/email`. Verify the sender domain, a verified recipient,
   and the failure shape for an unverified one.
-- Email receiving: native Void app only. If needed, plan a separate Worker now,
-  not later.
+- Email receiving: `email/` handlers in `apps/api` (native, so it works).
+  Never in `apps/web`.
 - Email domains: `void email domain add`, `void email status`, `void email setup`.
 - Sandboxes: `void/sandbox`. Verify Workers Paid, Containers, a command run, and
   a file round-trip.
 - Cron: `crons/`. Verify the job locally via `POST /__void/scheduled`, and that
   a second run is harmless.
 - Queues: `queues/`. Verify send, consume, `retry`, and a poison message.
-- WebSockets: not in framework mode. Decide Durable Object plus hibernation, or
-  drop the feature.
+- WebSockets: `apps/api` `routes/*.ws.ts` with `defineRoom`. Never in
+  `apps/web`.
 - SSE: one stream, abort respected, client reconnect handled.
 - Live event streams: `void/live`. Probe connect, subscribe on two tabs,
   publish, and reconnect before designing on it.
@@ -158,14 +171,16 @@ enter the plan. Details and API shapes: `backend.md`.
 Acceptance: each chosen surface has one working call, a recorded verdict in
 `AGENTS.md`, and a named cost or limit (quota, cold start, delivery semantic).
 
-## 7. Server functions
+## 7. API handlers
 
-Any function crossing the network: validate at the boundary with a schema
-parser, return typed results, throw typed errors. Business logic stays pure and
-testable; the handler is a thin shell. No `any` at the boundary.
+Any handler crossing the network: validate at the boundary with the contract
+from `packages/contracts`, return typed results, throw typed errors
+(`HTTPException` from Hono). Business logic lives in `packages/domain`, pure
+and testable; the handler is a thin shell. No `any` at the boundary. Web calls
+the API through the `hc` client; TanStack server functions do not exist.
 
-Acceptance: one test per server function for the happy path and one rejected
-input; `pnpm typecheck` clean.
+Acceptance: one test per handler for the happy path and one rejected input;
+the `hc` client typechecks against the contracts; `pnpm typecheck` clean.
 
 ## 8. Deploy
 
@@ -188,17 +203,27 @@ pnpm void connect --platform cloudflare
 pnpm void deploy --platform cloudflare
 ```
 
-Either way, record in `AGENTS.md`:
+The API app deploys with Void (native app):
+
+```bash
+cd apps/api
+pnpm void connect --platform cloudflare
+pnpm void deploy --platform cloudflare
+```
+
+Record both apps in `AGENTS.md`:
 
 ```markdown
 ## Deploy
-Owner: cf            # or: void
-Command: cf deploy   # or: void deploy --platform cloudflare
+web owner: cf          # or: void
+web command: cf deploy # or: void deploy --platform cloudflare
+api owner: void
+api command: void deploy   # run in apps/api
 Cloudflare account: <name>
 ```
 
-Acceptance: production URL returns 200, a server function works in production,
-and `cf workers deployments list` (or `void project status`) shows the deploy.
+Acceptance: the web URL returns 200, one `/api/v1` call works in production,
+and `cf workers deployments list` (or `void project status`) shows both deploys.
 
 ## 9. AGENTS.md template
 
@@ -208,28 +233,47 @@ and `cf workers deployments list` (or `void project status`) shows the deploy.
 <One paragraph: who it is for, the job it does, the pain it absorbs.>
 
 ## Stack
-TanStack Start (Vite) on Cloudflare Workers; Void SDK for db/kv/storage;
-Tailwind v4 + AlignUI tokens; Better Auth. Package manager: pnpm.
+Monorepo: apps/web (TanStack Start, rendering only), apps/api (native Void
+app, Hono handlers at /api/v1), packages/{domain,db,contracts}. Void on both
+apps; Postgres via Hyperdrive; Tailwind v4 + AlignUI tokens; Better Auth in
+apps/api. Package manager: pnpm.
+
+## Structure
+- packages/domain: pure services. Deps as params. No hono/void/tanstack imports.
+- packages/contracts: zod schemas, the single API contract, hc client.
+- packages/db: drizzle schema + migrations. The only place tables are defined.
+- void/* imports stay inside each app. Banned in packages/*.
+- Route groups: `_` prefix = pathless layout (the Next `(group)` feel); `-`
+  prefix = colocated files the router ignores.
+- Params are branded at the boundary: web validates in `beforeLoad`, api in
+  `withValidator`; raw URL strings never reach packages/domain.
+- Server functions are banned. Every data change goes through apps/api
+  handlers; `grep createServerFn apps/web` must stay empty.
 
 ## Design system
 - Tokens: docs/design-system.md. Semantic tokens only. No raw values.
-- Primitives: src/components/ui. Patterns: src/components/patterns.
+- Primitives: apps/web/src/components/ui. Patterns: apps/web/src/components/patterns.
 - Gallery: /design (dev only). Every component has a contract comment.
-- Run `pnpm lint` after every UI change and fix all errors.
+- Run `pnpm lint` and `pnpm typecheck` after every UI change and fix all errors.
 
 ## Deploy
-Owner: cf | void. Command: <command>. Account: <account>.
+web owner: cf | void. web command: <command>.
+api owner: void. api command: void deploy (in apps/api).
+Account: <account>.
 
 ## Commands
-dev: pnpm dev
+web dev: cd apps/web && pnpm dev
+api dev: cd apps/api && pnpm dev
 lint: pnpm lint
 typecheck: pnpm typecheck
-db: pnpm void db generate   # deploy applies migrations
-deploy: <command>
+db: cd apps/api && pnpm void db generate   # deploy applies migrations
+deploy web: <command>
+deploy api: cd apps/api && pnpm void deploy
 
 ## Rules
 - Read docs/spec.md and docs/pain-ledger.md before proposing features.
-- After making changes, run `pnpm lint` and fix all errors.
+- After making changes, run `pnpm lint` and `pnpm typecheck` and fix all errors.
+- New backend capability lands in apps/api behind /api/v1, never in the web app.
 ```
 
 ## 10. First week

@@ -1,14 +1,14 @@
 ---
 name: agentic-alade
-description: "Start a product: design system first, Void + cf deploy."
-version: 1.1.0
+description: "Start a product: design system first, Oxlint preset, Void + cf deploy."
+version: 1.4.0
 author: Alade C. Yessoufou, Hermes Agent
 license: MIT
 platforms: [macos, linux]
 metadata:
   hermes:
-    tags: [build, product, design-system, tanstack-start, void, cloudflare, cf, verification, scenarios]
-    related_skills: [poteto-mode, code-like-alade, shadcn-lint, cloudflare, durable-objects, implement, grill-me, verify-this, dogfood]
+    tags: [build, product, design-system, tanstack-start, hono, monorepo, void, cloudflare, cf, oxlint, lint, verification, scenarios]
+    related_skills: [poteto-mode, code-like-alade, coding-standards, install-anti-slop, shadcn-lint, cloudflare, durable-objects, implement, grill-me, verify-this, dogfood]
 ---
 
 # Agentic Alade
@@ -40,6 +40,16 @@ Read this file fully before scaffolding. Depth lives in `references/`.
    `docs/pain-ledger.md` with the machinery that absorbs it.
 8. **Write it down in the repo.** Decisions, contracts, and gotchas live in
    `AGENTS.md`, `docs/`, and code comments that explain *why*. Not in chat.
+9. **Direction before page.** Load `premium-ui` at the design phase. Every new
+   screen or redesign goes through its direction gate: three directions in the
+   real route, the human picks one, and the picked shell's numbers go into
+   `AGENTS.md`. A rebranded registry block is a starting point, not a result.
+10. **The lint preset is the floor.** Every TypeScript or JavaScript project
+    extends `@cloudflare/oxlint-config` and keeps Oxlint at zero. A rule turned
+    off without a scoped reason is a defect, not a preference.
+11. **One backend, one style.** Every HTTP surface is a Hono-style Void handler
+    in `apps/api`, versioned at `/api/v1`. TanStack Start server functions do
+    not exist in this stack; web and mobile call the same REST contract.
 
 ## The mantra
 
@@ -78,8 +88,10 @@ the product exists as a semantic token; `grep` finds no raw value in
 
 **2. Primitives.**
 `src/components/ui/`: one file per component, CVA variants, documented
-contract, `data-slot`. Gate: `/design` gallery renders every primitive in every
-state, and `pnpm lint` is clean.
+contract, `data-slot`. Interactive primitives come from `shadcn add` on Base
+UI and are restyled to semantic tokens before they land here. Base UI uses
+`render` instead of `asChild`. Gate: `/design` gallery renders every primitive
+in every state, and `pnpm lint` is clean under the Cloudflare preset.
 
 **3. Patterns.**
 `src/components/patterns/`: PageHeader, DataTable, EmptyState, FormField,
@@ -87,17 +99,21 @@ ConfirmDialog, StatCard, SettingsSection, AuthCard. Built from primitives only.
 Gate: gallery covers them; a page can be written with zero raw classes.
 
 **4. Domain and data.**
-Pick the dialect before the schema (D1 default, Postgres for write-heavy or
-join-heavy work). Types first, then `db/schema.ts`, then server functions with
-boundary validation. Decide every backend surface the product uses and probe
-the ones the docs do not guarantee. Gate: `void db generate` produces a
-migration you have read; a typed query round-trips locally; each surface has a
-recorded verdict.
+Pick the dialect before the schema (Postgres via Hyperdrive by default in the
+two-app shape; D1 only for a single app). Types first, then
+`packages/db/schema.ts`, then Hono handlers in `apps/api` with boundary
+validation. Decide every backend surface the product uses and probe the ones
+the docs do not guarantee. Gate: `void db generate` produces a migration you
+have read; a typed query round-trips locally through the API; each surface has
+a recorded verdict.
 
 **5. Flows.**
 Routes assembled from patterns. A route file should read as composition and
 data wiring, not styling. Gate: every screen has empty, loading, and error
-states; the scenario harness (`templates/scenarios.ts`) reports zero problems;
+states; premium-ui's direction gate ran for each new screen with three
+directions, 390 and 1440 screenshots and the pick recorded in `docs/spec.md`;
+the picked shell's numbers are in `AGENTS.md`; the scenario harness
+(`templates/scenarios.ts`) reports zero problems;
 each covered row has a passing Playwright handler that asserts the side effect;
 the adversarial pass ran and its findings are fixed or guarded; smoke test
 passes against the deployed URL.
@@ -113,16 +129,21 @@ run once.
 
 | Concern | Choice |
 |---|---|
-| Framework | TanStack Start (Vite, file routes, server functions) |
-| SDK and build | Void (`voidPlugin()`, `void/db`, `void/kv`, `void/storage`) |
-| Database | D1 by default; Postgres or MySQL via Hyperdrive |
-| Type flow | Drizzle schema to server functions; typed fetch only in Void apps |
-| Auth | Better Auth, TanStack Start integration |
+| Project shape | pnpm monorepo: `apps/web`, `apps/api`, `packages/{domain,db,contracts}` |
+| Web framework | TanStack Start (Vite, file routes, rendering only) |
+| API | Hono handlers in a native Void app (`apps/api`), versioned `/api/v1` |
+| SDK and build | Void on both apps: `voidPlugin()` in web; the native app owns the API |
+| Database | Postgres via Hyperdrive by default (one connection string shares across apps); D1 for a single app only |
+| Type flow | zod contracts in `packages/contracts`; typed `hc` client; no server functions |
+| Auth | Better Auth served from `apps/api`; cookies for web, bearer for mobile |
 | Styling | Tailwind v4 CSS-first, AlignUI tokens, CVA variants |
+| Components | shadcn/ui on Base UI, never Radix |
+| Code lint | Oxlint 1.94+ with `@cloudflare/oxlint-config`, type-aware via `tsrs`, errors only |
 | Design gate | `@shadcn/lint` at `error` on all six rules |
+| React health | react-doctor CLI + PR CI + agent skill |
 | Cloudflare CLI | `cf` (never Wrangler) |
 | Package manager | `pnpm` for app work; `cf` runs on Node 22.18+ only |
-| Coordination | Durable Objects via `defineDurableState` / `defineRoom` |
+| Coordination | WebSockets via `routes/*.ws.ts` + `defineRoom` in `apps/api`; DOs via `defineDurableState` |
 
 Details, file tree, and exact configs: `references/stack.md`. Data layer,
 dialects, type pipeline, typed fetch, KV, R2, durable state, and env:
@@ -131,25 +152,13 @@ dialects, type pipeline, typed fetch, KV, R2, durable state, and env:
 
 ## Backend surface
 
-Nine backend surfaces, three of which do not exist in framework mode. Email
-counts as one surface with three parts. Read `references/backend.md` before
-designing a feature that touches one.
+The backend lives in `apps/api`, a native Void app: every surface in
+`references/backend.md` is supported there as documented, including
+WebSockets, inbound email, and local queue auto-invoke. `apps/web` hosts no
+backend surfaces; it renders and calls the API. Email counts as one surface
+with three parts.
 
-| Surface | In TanStack Start |
-|---|---|
-| Authentication | Better Auth, not Void auth |
-| AI | `void/ai`, no local simulator |
-| Email sending | `void/email`, verified sender required |
-| Email receiving | not supported, needs a native Void app |
-| Email domains | `void email domain` on your Cloudflare zone |
-| Sandboxes | `void/sandbox`, Workers Paid + Containers |
-| Cron jobs | `crons/`, schedules do not fire locally |
-| Queues | `queues/`, local auto-invoke unsupported |
-| WebSockets | not supported, hand-roll a Durable Object |
-| SSE | plain `Response` with `text/event-stream` |
-| Live event streams | `void/live`, probe first |
-
-Rule: any surface marked unsupported or undocumented gets a 30 minute probe
+Rule: any surface marked "verify" or undocumented still gets a 30 minute probe
 before it enters a plan. Record the result in `AGENTS.md`.
 
 ## Design system law
@@ -165,10 +174,16 @@ before it enters a plan. Record the result in `AGENTS.md`.
   conditionals. Two sizes and two variants beat five.
 - Every primitive carries a contract comment and a gallery entry. The gallery
   is the review surface; the designer reviews states, not diffs.
-- Rules live in `.oxlintrc.json`, not in prose nobody runs. The linter is the
-  design system's enforcement arm.
+- Rules live in `oxlint.config.ts`, not in prose nobody runs. Extend
+  `@cloudflare/oxlint-config` for code quality and layer `@shadcn/lint` for the
+  design system. The linter is the enforcement arm for both.
+- Install UI from the `premium-ui` registry (`@premium/*` items), never rebuild
+  a lookalike. A rebranded direction is the starting point, not the result;
+  `premium-ui` step 2b is the gate for every new screen.
 
 Tokens, skeletons, lint config, and the gallery: `references/design-system.md`.
+The preset, rule-by-rule fixes, React exceptions, and migration:
+`references/lint.md`.
 
 ## Verification law
 
@@ -182,7 +197,7 @@ an artifact in the repo, run from phase 0 and never stop:
 | Break it | "Try to break what you just built. Evidence or it did not happen." | `docs/findings.md` |
 | Screenshot | "Before/after pair per changed screen, seeded, both themes." | `docs/shots/<feature>/` |
 | Variants | "Give me three variants of this piece I can switch between and try." | `/design` switcher |
-| Monitor | "Loop the bar: fast on commit, smoke on deploy, watch nightly. Fail on regression." | `docs/quality.log` |
+| Monitor | "Loop the bar: fast on commit, smoke on deploy, watch nightly, react-doctor on every PR. Fail on regression." | `docs/quality.log` |
 
 Rules that make each move real:
 
@@ -202,6 +217,9 @@ Rules that make each move real:
 - **A loop without a threshold is a dashboard.** Lint and types at zero, smoke
   under 90s, LCP under 2.5s at p75, error rate under 0.5%, no row green to red.
   The failing row id is named in whatever channel the human reads.
+- **react-doctor runs where the code is written.** Install its agent skill at
+  phase 0, run it in the fast loop with `--blocking error`, and install the PR
+  workflow with `react-doctor ci install`. Telemetry off by default here.
 
 Templates: `templates/scenarios.ts` (matrix plus coverage gate),
 `templates/scenarios.spec.ts` (Playwright view, fails on a row with no handler),
@@ -225,7 +243,7 @@ Default mode is `poteto-mode`. The skill pack is already installed under
 | Phase | Load |
 |---|---|
 | Spec | `to-prd`, `tech-spec`, `product-thinking`, `understand-customers`, `grill-me` |
-| Design system | `prototype`, `principle-exhaust-the-design-space`, `pick-ui-library`, `control-ui`, `unslop` |
+| Design system | `premium-ui`, `premium-react`, `prototype`, `principle-exhaust-the-design-space`, `pick-ui-library`, `control-ui`, `unslop` |
 | Build | `architect`, `implement`, `code-like-alade`, `domain-modeling`, `typescript-best-practices` |
 | Verify | `principle-prove-it-works`, `verify-this`, `run-smoke-tests`, `dogfood`, `interrogate`, `arena` |
 | Adversarial | `dogfood`, `verify-this`, plus `templates/scenarios.spec.ts` as the harness |
@@ -238,29 +256,54 @@ Delegation policy, entry/exit criteria, and the reality checks:
 ## Bootstrap
 
 ```bash
-pnpm dlx @tanstack/cli@latest create <app>        # Vite + TanStack Start
-cd <app>
-pnpm add -D void && pnpm void init             # voidPlugin(), docs, agent skill
+# 0. Monorepo shell
+mkdir <app> && cd <app> && pnpm init
+
+# 1. Web app: TanStack Start in framework mode (rendering only)
+pnpm dlx @tanstack/cli@latest create apps/web
+cd apps/web
+pnpm add -D void && pnpm void init             # voidPlugin() first, docs, agent skill
+pnpm dlx shadcn@latest init --base base           # Base UI, never Radix
 pnpm dlx @alignui/cli tailwind                     # tokens; run before any custom CSS
-pnpm add -D @shadcn/lint oxlint
-cf auth whoami || cf auth login               # Cloudflare, once per machine
-cf init .                                     # writes cloudflare.config.ts
-cf build                                      # gate: can cf own the build?
+
+# 2. API app: native Void app; its handlers run on Hono
+cd ../..
+pnpm create void apps/api                          # creates the dir; pick the Cloudflare target
+cd apps/api
+pnpm add hono zod
+
+# 3. Shared packages
+cd ../..
+mkdir -p packages/contracts packages/domain packages/db
+
+# 4. Code-quality floor: Oxlint + the Cloudflare preset, at the repo root
+node ~/.agents/skills/agentic-alade/scripts/setup-lint.mjs --shadcn --baseline
+# writes oxlint.config.ts, installs the preset, adds lint/typecheck scripts
+
+# 5. React health
+pnpm dlx react-doctor@latest install -y            # agent skill + optional hooks
+pnpm dlx react-doctor@latest ci install            # PR scan workflow
+
+# 6. Cloudflare, once per machine
+cf auth whoami || cf auth login
 ```
 
-The authoritative setup path is Void's quickstart,
-`https://void.cloud/guide/quickstart`, and for this stack the framework guide,
-`https://void.cloud/integrations/frameworks/tanstack-start`: install `void`,
+The authoritative setup paths: Void's quickstart,
+`https://void.cloud/guide/quickstart`, the framework guide for the web app,
+`https://void.cloud/integrations/frameworks/tanstack-start`, and the Hono
+guide for the API app, `https://void.cloud/integrations/hono`: install `void`,
 run `void init`, keep `voidPlugin()` before the TanStack plugin, and add no
-separate Cloudflare adapter.
+separate Cloudflare adapter. The API app is native: no Vite config, Void's own
+build, full surfaces.
 
 `void init` also writes an `AGENTS.md` section, links Void's own `void` skill
 into the agent config it detects, and ships version-matched Markdown docs at
 `node_modules/void/docs/`. Read those docs for the installed version; the
 website may be ahead of your app.
 
-If `cf build` fails on the framework, the deploy owner becomes Void:
-`void deploy --platform cloudflare`. Record the decision and its reason in
+Deploy owner is decided per app in phase 0: the API app deploys with Void
+(native app, `void deploy`); the web app tries `cf build` first and falls back
+to `void deploy --platform cloudflare`. Record both decisions and reasons in
 `AGENTS.md` before writing features. Full runbook and the `AGENTS.md` template:
 `references/bootstrap.md`.
 
@@ -279,13 +322,15 @@ If `cf build` fails on the framework, the deploy owner becomes Void:
 - **`skill tanstack-start` is Vinxi-era.** Trust `tanstack.com/start` and the
   Cloudflare/Void pages over it; the API surface moved to
   `@tanstack/react-start/plugin/vite`.
-- **Void auth is unsupported in framework mode.** Use Better Auth's TanStack
-  Start integration, not the Void auth helpers.
-- **WebSockets and inbound email are Void-app only.** TanStack Start needs a
-  hand-rolled Durable Object and a separate inbound Worker.
-- **Cron and queue dev endpoints are manual in framework mode.** Schedules do
-  not fire locally, and sending to a queue does not invoke the consumer; use
-  `POST /__void/scheduled` and `POST /__void/queue` with the dev trigger token.
+- **Auth lives once, in `apps/api`.** Better Auth is served from the API app;
+  web gets cookie sessions on the shared domain, mobile uses bearer via
+  `@better-auth/expo`. Never mount a second auth in `apps/web`.
+- **WebSockets and inbound email belong in `apps/api`.** The native app gives
+  both for free. A hand-rolled Durable Object inside the web app is the smell
+  of a feature that belongs behind the API.
+- **Cron and queue dev triggers are manual only in framework-mode apps.**
+  `apps/api` auto-invokes locally. If the web app ever needs one: `POST
+  /__void/scheduled` or `POST /__void/queue` with the dev trigger token.
 - **Void docs live in the package.** `node_modules/void/docs/` matches the
   installed version, and `void init` links a `void` skill plus an `AGENTS.md`
   section. Read the local docs before the website.
@@ -293,14 +338,57 @@ If `cf build` fails on the framework, the deploy owner becomes Void:
   from one machine only, then commit the lock file.
 - **Schema drift stops deploys.** Run `void db generate`, read the SQL, commit
   it, deploy again.
-- **Void typed fetch needs Void routes.** It checks paths under `routes/`. In
-  framework mode use `createServerFn`; do not import `void/client`.
+- **Void typed fetch exists only inside the API app.** `apps/web` calls
+  `/api/v1` with the `hc` client built from `packages/contracts`; it never
+  imports `void/client` and never mounts Void routes.
 - **KV is eventually consistent.** Never hold balances, locks, or revoked
   sessions there. Use D1 or a Durable Object.
+- **Two apps must not infer the same resource twice.** Void provisions per
+  app. Share state through Postgres via Hyperdrive (a connection string)
+  unless a probe has proven one D1 binds into both apps.
+- **`hc` needs an exportable app type.** If the API app does not export a
+  chained Hono app type, generate the client from the contracts' OpenAPI spec
+  (`openapi-typescript`) instead. Probe which mechanism works on first
+  wire-up; record it in `AGENTS.md`.
+- **URL strings do not enter the domain.** The web validates `params` in
+  `beforeLoad` and the API validates them in `withValidator`; both hand a
+  branded id to `packages/domain`. A raw `postId: string` in a service is a
+  bug.
 - **`.env.local` and `.dev.vars` are ignored.** One root `.env` for local
   values, `void secret put` for production, and anything `VITE_*` is public.
-- **Lint at `warn` is decoration.** All six rules are `error` or the design
-  system is a suggestion.
+- **Lint at `warn` is decoration.** All six shadcn rules are `error` or the
+  design system is a suggestion.
+- **A shallow lint merge deletes the floor.** `rules: { ... }` without
+  `...cloudflare.rules` replaces every inherited rule and the gate goes green
+  for the wrong reason. Spread `cloudflare`, `cloudflare.rules`,
+  `cloudflare.overrides`, `cloudflare.ignorePatterns`, and
+  `cloudflare.jsPlugins`.
+- **Hand-written lint setup drifts.** Run
+  `scripts/setup-lint.mjs --shadcn --baseline` instead of writing the config
+  from memory; it refuses to overwrite an existing config.
+- **A rule that stops firing looks like progress.** Run
+  `scripts/verify-lint-fixture.mjs` after every Oxlint, `tsrs`, or preset
+  upgrade. It asserts all 14 expected rules still fire.
+- **Type-aware lint has a second binary.** `@cloudflare/oxlint-config` peers on
+  `oxlint@^1.94.0` and `tsrs`; without `tsrs` the type-aware rules do not run.
+  Node 22.18+ or 24+ is required.
+- **`== null` is not the shortcut it looks like.** The preset requires strict
+  equality for null too. Write `value === null || value === undefined`.
+- **`no-console` covers app code.** Add a scoped file override for the entry
+  point; do not sprinkle disable comments through features.
+- **Lint is not a typecheck.** Keep `tsc --noEmit`. The preset catches unsafe
+  flow; it does not replace compiler diagnostics.
+- **Green by suppression is not green.** No `any`, `!`, or global rule-off to
+  silence a finding. Fix it or scope the exception with a written reason.
+- **react-doctor at advisory level is decoration.** Use `--blocking error` in
+  CI and the fast loop; a score nobody acts on is a dashboard.
+- **react-doctor telemeters by default.** Pass `--no-telemetry` unless the
+  project opts in.
+- **Radix is banned.** Init with `shadcn init --base base`. Base UI uses
+  `render` instead of `asChild`, `Backdrop` instead of `Overlay`, and nullable
+  Select values, so Radix-era examples do not apply.
+- **Generated shadcn components ship raw values.** Restyle them to AlignUI
+  semantic tokens before they enter `src/components/ui/`.
 - **Gallery in production.** Guard `/design` behind dev or an explicit flag.
 - **Deleting a customer pain is not free.** Every absorbed pain needs a cost
   line; unmeasured absorption becomes an outage you did not budget for.
@@ -320,6 +408,10 @@ If `cf build` fails on the framework, the deploy owner becomes Void:
   green files nobody opens do not hold a bar.
 - **Variant switches outlive decisions.** Pick within the PR and delete the
   losers, or the flag ships into support tickets.
+- **Agents drift to flat route folders.** Route groups are `_`-prefixed
+  pathless layouts (the Next `(group)` feel) and colocated files are
+  `-`-prefixed. Both are in the project's `AGENTS.md` tree; hold every new
+  screen to it.
 
 ## Verification
 
@@ -329,9 +421,20 @@ Before calling a project buildable:
 - [ ] Deploy owner named in `AGENTS.md`
 - [ ] Semantic tokens cover every style used; no raw values in `src/`
 - [ ] `/design` gallery renders all primitives and patterns in all states
-- [ ] `pnpm lint` clean, all `@shadcn/lint` rules at `error`
+- [ ] `premium-ui` direction gate passed per new screen; three directions, both
+      viewport screenshots and the pick in `docs/spec.md`; picked shell in `AGENTS.md`
+- [ ] `pnpm lint` clean, all `@shadcn/lint` rules at `error`, and
+      `oxlint.config.ts` spreads `@cloudflare/oxlint-config` with no unscoped
+      disables
+- [ ] `tsrs` installed so type-aware rules actually ran; `pnpm typecheck` runs
+      as a separate command and is clean
+- [ ] `scripts/verify-lint-fixture.mjs` passed after the last Oxlint or preset
+      upgrade
+- [ ] `components.json` uses Base UI; no `@radix-ui/*` in `package.json`
 - [ ] `pnpm typecheck` clean
-- [ ] `void db generate` output committed; local query round-trips
+- [ ] `void db generate` output committed; an API query round-trips locally
+- [ ] `/api/v1` contract lives in `packages/contracts`; web calls it via `hc`;
+      `grep createServerFn apps/web` finds nothing
 - [ ] `pnpm void env check` clean and every server key exists remotely
 - [ ] Every backend surface used is listed in `AGENTS.md` with a probe result
 - [ ] `docs/scenarios.md` covers the failure floor; `scripts/scenarios.ts`
@@ -344,5 +447,6 @@ Before calling a project buildable:
       themes, with scenario ids
 - [ ] Quality loop scheduled, `docs/quality.log` has a green line, budgets in
       `AGENTS.md`
+- [ ] react-doctor skill installed; fast loop and PR workflow run with `--blocking error`
 - [ ] Production URL verified from outside; logs clean after a request
 - [ ] Rollback command documented and exercised once
