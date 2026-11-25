@@ -50,6 +50,10 @@ Read this file fully before scaffolding. Depth lives in `references/`.
 11. **One backend, one style.** Every HTTP surface is a Hono-style Void handler
     in `apps/api`, versioned at `/api/v1`. TanStack Start server functions do
     not exist in this stack; web and mobile call the same REST contract.
+12. **Tiger Style is mandatory.** Assert both sides of every boundary, put a
+    limit on everything, say why in comments, 70-line functions. Web rules in
+    `references/tiger-style.md`; the original applies verbatim to systems
+    work.
 
 ## The mantra
 
@@ -250,7 +254,7 @@ Default mode is `poteto-mode`. The skill pack is already installed under
 |---|---|
 | Spec | `to-prd`, `tech-spec`, `product-thinking`, `understand-customers`, `grill-me` |
 | Design system | `premium-ui`, `premium-react`, `prototype`, `principle-exhaust-the-design-space`, `pick-ui-library`, `control-ui`, `unslop` |
-| Build | `architect`, `implement`, `code-like-alade`, `domain-modeling`, `typescript-best-practices` |
+| Build | `architect`, `implement`, `code-like-alade`, `domain-modeling`, `typescript-best-practices`, `tiger-style` |
 | Verify | `principle-prove-it-works`, `verify-this`, `run-smoke-tests`, `dogfood`, `interrogate`, `arena` |
 | Adversarial | `dogfood`, `verify-this`, plus `templates/scenarios.spec.ts` as the harness |
 | Ship | `review-and-ship`, `make-pr-easy-to-review`, `technical-writing`, `show-me-your-work` |
@@ -429,6 +433,10 @@ to `void deploy --platform cloudflare`. Record both decisions and reasons in
   pathless layouts (the Next `(group)` feel) and colocated files are
   `-`-prefixed. Both are in the project's `AGENTS.md` tree; hold every new
   screen to it.
+- **Tiger Style is law, not taste.** Assert both sides of every boundary, put
+  a limit on everything, say why, 70-line functions, zero runtime deps beyond
+  the floor. A rule without its why is a suggestion, and agents ignore
+  suggestions.
 
 ## Verification
 
@@ -452,6 +460,8 @@ Before calling a project buildable:
 - [ ] `void db generate` output committed; an API query round-trips locally
 - [ ] `/api/v1` contract lives in `packages/contracts`; web calls it via `hc`;
       `grep createServerFn apps/web` finds nothing
+- [ ] Tiger Style green: no function over 70 lines, every boundary rejects
+      invalid input in `docs/scenarios.md`, every loop/fetch/queue bounded
 - [ ] `pnpm void env check` clean and every server key exists remotely
 - [ ] Every backend surface used is listed in `AGENTS.md` with a probe result
 - [ ] `docs/scenarios.md` covers the failure floor; `scripts/scenarios.ts`

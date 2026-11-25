@@ -268,6 +268,8 @@ deploy api: cd apps/api && pnpm void deploy
 - Read docs/spec.md and docs/pain-ledger.md before proposing features.
 - After making changes, run `pnpm lint` and `pnpm typecheck` and fix all errors.
 - New backend capability lands in apps/api behind /api/v1, never in the web app.
+- Tiger Style applies: assert both sides of every boundary, put a limit on
+  everything, say why in comments, functions stay under 70 lines.
 ```
 
 ## 10. First week
